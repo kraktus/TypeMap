@@ -1,3 +1,6 @@
+import scala.concurrent.{ Future, Promise, ExecutionContext }
+import scala.concurrent.ExecutionContext.Implicits.global
+
 // For more information on writing tests, see
 // https://scalameta.org/munit/docs/getting-started.html
 opaque type IntOpaque = Int
@@ -35,4 +38,24 @@ class MySuite extends munit.FunSuite:
     assertEquals(map.get[String], None)
     // does not compile as expected
     // assertEquals(map.get[Float], None)
+  }
+
+  test("Bus") {
+    val a                  = A(1)
+    var aResult: Option[A] = None
+    val b                  = B("This is a B")
+    var bResult: Option[B] = None
+    val c                  = C(3, "4", 5.0f)
+    var cResult: Option[C] = None
+    Bus.subscribe[A] { case x: A => aResult = Some(x) }
+    Bus.subscribe[B] { case y: B => bResult = Some(b) }
+    Bus.subscribe[C] { case C(i, s, f) => cResult = Some(C(i, s, f)) }
+    Bus.subscribe[D] { case D(p) => p.completeWith(Future.successful(42)) }
+    Bus.publish(a)
+    Bus.publish(b)
+    Bus.publish(c)
+    assertEquals(aResult, Some(a))
+    assertEquals(bResult, Some(b))
+    assertEquals(cResult, Some(c))
+    Bus.ask[Int, D](D.apply).foreach { x => assertEquals(x, 42) }
   }
