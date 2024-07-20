@@ -20,8 +20,6 @@ private def typeNamesTupleMacroImpl[T <: Tuple](using Quotes, Type[T]): Expr[Lis
     case _                    => Nil
   Expr(tTypes.map(_.show))
 
-
-
 inline def isInTuple[X, T <: Tuple]: Boolean = ${ isInTupleImpl[X, T] }
 
 def isInTupleImpl[X: Type, T <: Tuple: Type](using Quotes): Expr[Boolean] =
