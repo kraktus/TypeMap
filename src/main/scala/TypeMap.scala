@@ -3,7 +3,6 @@ import scala.quoted.*
 
 type Backend[V] = CMap[String, V]
 
-
 // associate a value of type V to each type in the tuple K
 // TODO use PHF
 class TypeMap[K <: Tuple, V](private val map: Backend[V]):
