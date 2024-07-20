@@ -6,7 +6,7 @@ trait Busable
 case class A(i: Int)                      extends Busable
 case class B(s: String)                   extends Busable
 case class C(i: Int, s: String, f: Float) extends Busable
-case class D(p: Promise[Int])             extends Busable
+case class D(init: Int, p: Promise[Int])  extends Busable
 
 type ABCD = (A, B, C, D)
 

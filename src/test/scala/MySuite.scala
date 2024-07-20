@@ -36,7 +36,7 @@ class MySuite extends munit.FunSuite:
     map.put[Int]("1")
     assertEquals(map.get[Int], Some("1"))
     assertEquals(map.get[String], None)
-    // does not compile as expected
+    // does not compile, as expected
     // assertEquals(map.get[Float], None)
   }
 
@@ -50,12 +50,12 @@ class MySuite extends munit.FunSuite:
     Bus.subscribe[A] { case x: A => aResult = Some(x) }
     Bus.subscribe[B] { case y: B => bResult = Some(b) }
     Bus.subscribe[C] { case C(i, s, f) => cResult = Some(C(i, s, f)) }
-    Bus.subscribe[D] { case D(p) => p.completeWith(Future.successful(42)) }
+    Bus.subscribe[D] { case D(init, p) => p.completeWith(Future.successful(init + 42)) }
     Bus.publish(a)
     Bus.publish(b)
     Bus.publish(c)
     assertEquals(aResult, Some(a))
     assertEquals(bResult, Some(b))
     assertEquals(cResult, Some(c))
-    Bus.ask[Int, D](D.apply).foreach { x => assertEquals(x, 42) }
+    Bus.ask[Int, D](D(6, _)).foreach { x => assertEquals(x, 48) }
   }
