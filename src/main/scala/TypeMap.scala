@@ -11,7 +11,7 @@ class TypeMap[K <: Tuple, V](private val map: Backend[V]):
   inline def put[T](value: V): Unit = ${ putImpl[T, K, V]('map, 'value) }
 
 def getImpl[T, K <: Tuple, V](
-    map: Expr[CMap[String, V]]
+    map: Expr[Backend[V]]
 )(using Quotes, Type[T], Type[K], Type[V]): Expr[Option[V]] =
   opImpl[T, K, V, Option[V]](map, '{ Option(${ map }.get(${ typeNameImpl[T] })) })
 
