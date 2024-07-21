@@ -8,7 +8,7 @@ trait BackendOps[F[_], V]:
   def make(length: Int): F[V]
   // depending on the underlying backend, the index or key will be used
   // index of the type `T` in the type union `K` of `TypeMap`
-  // TODO can index be using a opaque int in macro?
+  // TODO can index be using a opaque type in macro?
   def get(ds: F[V], index: Int, key: String): Option[V]
   def put(ds: F[V], index: Int, key: String, value: V): Unit
 
