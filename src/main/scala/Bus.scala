@@ -6,9 +6,12 @@ case class A(i: Int)
 case class B(s: String)
 case class C(i: Int, s: String, f: Float)
 case class D(init: Int, p: Promise[Int])
+enum Foo:
+  case Bar(i: Int)
+  case Baz(s: String)
 
 object Bus:
-  private type Keys  = A | B | C | D
+  private type Keys  = A | B | C | D | Foo
   private type Value = Set[PartialFunction[Keys, Unit]]
   val map: TypeMap[Keys, Value, CMapBackend] = TypeMap.empty
 
