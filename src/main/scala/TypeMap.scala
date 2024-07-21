@@ -25,7 +25,7 @@ def opImpl[T: Type, K: Type, V: Type, Result: Type](res: Expr[(Int, String) => R
   import quotes.reflect.report
   isInUnionImpl[T, K] match
     case Expr(true)  => '{ ${ res }(${ indexInUnionImpl[T, K] }, ${ typeNameImpl[T] }) }
-    case Expr(false) => report.errorAndAbort(s"Type ${Type.show[T]} not found in tuple ${Type.show[K]}")
+    case Expr(false) => report.errorAndAbort(s"Type ${Type.show[T]} not found in union ${Type.show[K]}")
 
 object TypeMap:
   inline def empty[K, V, F[_]](using ds: BackendOps[F, V]): TypeMap[K, V, F] = ${ emptyImpl[K, V, F]('ds) }
