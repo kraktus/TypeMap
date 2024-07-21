@@ -3,6 +3,13 @@ import scala.quoted.*
 
 type Backend[V] = CMap[String, V]
 
+// DS = Data Structure
+trait BackendOps[DS, V]:
+  extension (ds: DS)
+    def get(key: String): Option[V]
+    def put(key: String, value: V): Unit
+
+
 // associate a value of type V to each type in the tuple K
 // TODO use PHF
 class TypeMap[K <: Tuple, V](private val map: Backend[V]):
