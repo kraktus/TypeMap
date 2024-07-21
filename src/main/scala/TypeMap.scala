@@ -13,13 +13,13 @@ trait BackendOps[DS, V]:
 // TODO use PHF
 class TypeMap[K, V](private val map: Backend[V]):
 
-  inline def get[T]: Option[V]      = ${ getImpl[T, K, V]('{x => Option(map.get(x))}) }
+  inline def get[T]: Option[V]      = ${ getImpl[T, K, V]('{ x => Option(map.get(x)) }) }
   inline def put[T](value: V): Unit = ${ putImpl[T, K, V]('map, 'value) }
 
 def getImpl[T: Type, K: Type, V: Type](
-    res: Expr[String => Option[V]],
+    res: Expr[String => Option[V]]
 )(using Quotes): Expr[Option[V]] =
-  opImpl[T, K, V, Option[V]]('{ ${res}(${ typeNameImpl[T] }) })
+  opImpl[T, K, V, Option[V]]('{ ${ res }(${ typeNameImpl[T] }) })
 
 def putImpl[T: Type, K: Type, V: Type](map: Expr[Backend[V]], value: Expr[V])(using
     Quotes
