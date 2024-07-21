@@ -16,8 +16,9 @@ object Bus:
   inline def subscribe[T <: Keys](f: PartialFunction[T, Unit]): Unit =
     val buseableFunction: PartialFunction[Keys, Unit] = {
       case x: T =>
-        // FIXME, not always error when type T is enum, and matching only one variant
-        f.applyOrElse(x, _ => println(s"Subscribe error: unhandled message of type ${typeName[T]}: $x"))
+        // it's not always error when type T is enum, and matching only one variant
+        f.applyOrElse(x, _ => ())
+      // error because events are based by types
       case y => println(s"Subscribe error: Incorrect message type, wanted: ${typeName[T]}, received: $y")
     }
     map.put[T](map.get[T].fold(Set(buseableFunction))(_ + buseableFunction))
