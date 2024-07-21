@@ -5,6 +5,7 @@ import scala.quoted.*
 // generally, DS = F[V]
 trait BackendOps[F[_], V]:
   def empty: F[V]
+  def make(length: Int): F[V]
   // depending on the underlying backend, the index or key will be used
   // index of the type `T` in the type union `K` of `TypeMap`
   // TODO can index be using a opaque int in macro?
@@ -27,4 +28,8 @@ def opImpl[T: Type, K: Type, V: Type, Result: Type](res: Expr[(Int, String) => R
     case Expr(false) => report.errorAndAbort(s"Type ${Type.show[T]} not found in tuple ${Type.show[K]}")
 
 object TypeMap:
-  def empty[K, V, F[_]](using ds: BackendOps[F, V]) = TypeMap[K, V, F](ds.empty)
+  inline def empty[K, V, F[_]](using ds: BackendOps[F, V]): TypeMap[K, V, F] = ${ emptyImpl[K, V, F]('ds) }
+  def emptyImpl[K: Type, V: Type, F[_]: Type](ds: Expr[BackendOps[F, V]])(using
+      Quotes
+  ): Expr[TypeMap[K, V, F]] =
+    '{ TypeMap[K, V, F](${ ds }.make(${ unionLengthImpl[K] }))(using ${ ds }) }

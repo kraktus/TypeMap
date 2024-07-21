@@ -5,12 +5,14 @@ type CMapBackend = [X] =>> CMap[String, X]
 given [Value]: BackendOps[CMapBackend, Value] with
   private type DS = CMap[String, Value]
   def empty: DS                                                = new DS()
+  def make(_length: Int): DS                                   = empty
   def get(ds: DS, index: Int, key: String): Option[Value]      = Option(ds.get(key))
   def put(ds: DS, index: Int, key: String, value: Value): Unit = ds.put(key, value)
 
-type ArrayBufferBackend = [X] =>> ArrayBuffer[X]
+type ArrayBufferBackend = [X] =>> ArrayBuffer[Option[X]]
 given [Value]: BackendOps[ArrayBufferBackend, Value] with
-  private type DS = ArrayBuffer[Value]
+  private type DS = ArrayBuffer[Option[Value]]
   def empty: DS                                                = ArrayBuffer.empty
-  def get(ds: DS, index: Int, key: String): Option[Value]      = ds.lift(index)
-  def put(ds: DS, index: Int, key: String, value: Value): Unit = ds(index) = value
+  def make(length: Int): DS                                    = ArrayBuffer.fill(length)(None)
+  def get(ds: DS, index: Int, key: String): Option[Value]      = ds.lift(index).flatten
+  def put(ds: DS, index: Int, key: String, value: Value): Unit = ds(index) = Some(value)
