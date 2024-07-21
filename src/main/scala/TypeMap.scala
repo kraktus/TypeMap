@@ -1,4 +1,3 @@
-import java.util.concurrent.ConcurrentHashMap as CMap
 import scala.quoted.*
 
 // A general trait over the backend data structure
@@ -10,13 +9,6 @@ trait BackendOps[F[_], V]:
   // otherwise got `Deferred inline method get in trait BackendOps cannot be invoked
   def get(ds: F[V], keys: List[String], key: String): Option[V]
   def put(ds: F[V], keys: List[String], key: String, value: V): Unit
-
-type CMapBackend = [X] =>> CMap[String, X]
-given [Value]: BackendOps[CMapBackend, Value] with
-  private type DS = CMap[String, Value]
-  def empty: DS                                                      = new DS()
-  def get(ds: DS, _l: List[String], key: String): Option[Value]      = Option(ds.get(key))
-  def put(ds: DS, _l: List[String], key: String, value: Value): Unit = ds.put(key, value)
 
 // associate a value of type V to each type in the tuple K
 // TODO use PHF
