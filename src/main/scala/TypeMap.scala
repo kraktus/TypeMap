@@ -14,17 +14,17 @@ trait BackendOps[DS, V]:
 class TypeMap[K, V](private val map: Backend[V]):
 
   inline def get[T]: Option[V]      = ${ getImpl[T, K, V]('{ x => Option(map.get(x)) }) }
-  inline def put[T](value: V): Unit = ${ putImpl[T, K, V]('map, 'value) }
+  inline def put[T](value: V): Unit = ${ putImpl[T, K, V]('{ map.put(_, value) }) }
 
 def getImpl[T: Type, K: Type, V: Type](
     res: Expr[String => Option[V]]
 )(using Quotes): Expr[Option[V]] =
   opImpl[T, K, V, Option[V]]('{ ${ res }(${ typeNameImpl[T] }) })
 
-def putImpl[T: Type, K: Type, V: Type](map: Expr[Backend[V]], value: Expr[V])(using
+def putImpl[T: Type, K: Type, V: Type](res: Expr[String => Unit])(using
     Quotes
 ): Expr[Unit] =
-  opImpl[T, K, V, Unit]('{ ${ map }.put(${ typeNameImpl[T] }, ${ value }) })
+  opImpl[T, K, V, Unit]('{ ${ res }(${ typeNameImpl[T] }) })
 
 def opImpl[T: Type, K: Type, V: Type, Result](res: Expr[Result])(using
     Quotes
