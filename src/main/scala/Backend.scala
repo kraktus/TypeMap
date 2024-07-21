@@ -3,7 +3,7 @@ import scala.collection.mutable.ArrayBuffer
 
 type CMapBackend = [X] =>> CMap[String, X]
 given [Value]: BackendOps[CMapBackend, Value] with
-  private type DS = CMap[String, Value]
+  private type DS = CMapBackend[Value]
   def empty: DS                                                = new DS()
   def make(_length: Int): DS                                   = empty
   def get(ds: DS, index: Int, key: String): Option[Value]      = Option(ds.get(key))
