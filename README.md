@@ -1,8 +1,15 @@
-## sbt project compiled with Scala 3
+## Scala3 TypeMap
+
+This project is a simple implementation of a type-level map in Scala3, using macros. Inspired by the rust crate [`anymap`](https://docs.rs/anymap/latest/anymap/).
 
 ### Usage
 
-This is a normal sbt project. You can compile code with `sbt compile`, run it with `sbt run`, and `sbt console` will start a Scala 3 REPL.
-
-For more information on the sbt-dotty plugin, see the
-[scala3-example-project](https://github.com/scala/scala3-example-project/blob/main/README.md).
+```scala
+    val map: TypeMap[Int | String, String] = TypeMap.empty
+    map.put[Int]("1")
+    assertEquals(map.get[Int], Some("1"))
+    assertEquals(map.get[String], None)
+    
+    // does not compile, as expected
+    // assertEquals(map.get[Float], None)
+```
