@@ -49,6 +49,27 @@ private def isInUnionImpl[X: Type, U: Type](using Quotes): Expr[Boolean] =
   val uTypes = get(u)
   Expr(uTypes.exists(_ =:= xType))
 
+inline def indexInUnion[X, U]: Int = ${ indexInUnionImpl[X, U] }
+
+private def indexInUnionImpl[X: Type, U: Type](using Quotes): Expr[Int] =
+  import quotes.reflect.*
+  // sanity check
+  isUnionSanityCheck[U]
+  // TODO find a way to extract, but using type `TypeRepr` in signature is a pain...
+  // because imported by `quotes.reflect.*` that needs a given Quotes
+  def get(tr: TypeRepr): List[TypeRepr] =
+    tr.dealiasKeepOpaques match
+      case OrType(tpes, tpesB) => get(tpes) ++ get(tpesB)
+      case _                   => List(tr)
+
+  val xType  = TypeRepr.of[X].dealiasKeepOpaques
+  val u      = TypeRepr.of[U].dealiasKeepOpaques
+  val uTypes = get(u)
+  val index = uTypes.zipWithIndex.find(_._1 =:= xType).map(_._2) match
+    case Some(idx) => idx
+    case None      => report.errorAndAbort(s"Type ${xType.show} not found in union ${u.show}")
+  Expr(index)
+
 private def isUnionSanityCheck[T: Type](using Quotes): Unit =
   import quotes.reflect.*
   val t = TypeRepr.of[T].dealiasKeepOpaques
