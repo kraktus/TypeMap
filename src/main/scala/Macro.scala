@@ -58,7 +58,7 @@ private def isUnionSanityCheck[T: Type](using Quotes): Unit =
 
 // same function as typeNamesTupleMacro, but for union types
 inline def typeNamesUnion[T]: List[String] = ${ typeNamesUnionImpl[T] }
-private def typeNamesUnionImpl[T: Type](using Quotes): Expr[List[String]] =
+def typeNamesUnionImpl[T: Type](using Quotes): Expr[List[String]] =
   import quotes.reflect.*
 
   // sanity check

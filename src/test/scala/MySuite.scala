@@ -37,9 +37,8 @@ class MySuite extends munit.FunSuite:
     // does not compile, as expected
     // assertEquals(typeNamesUnion[Int], List())
   }
-
   test("TypeMap") {
-    val map: TypeMap[Int | String, String] = TypeMap.empty
+    val map: TypeMap[Int | String, String, CMapBackend] = TypeMap.empty
     map.put[Int]("1")
     assertEquals(map.get[Int], Some("1"))
     assertEquals(map.get[String], None)

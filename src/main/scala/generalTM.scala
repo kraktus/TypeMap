@@ -30,9 +30,9 @@ given [Value]: BackendOps5[[X] =>> CMap[String, X], Value] with
 // associate a value of type V to each type in the tuple K
 // TODO use PHF
 class TypeMap2[K, V, F[_]](private val map: F[V])(using bops: BackendOps5[F, V]):
-  inline def get[T]: Option[V] = ${ getImpl2[T, K, V, F[V]]('{ bops.get(map, _) }) }
+  inline def get[T]: Option[V] = ${ getImpl2[T, K, V]('{ bops.get(map, _) }) }
 
-def getImpl2[T: Type, K: Type, V: Type, DS](res: Expr[String => Option[V]])(using
+def getImpl2[T: Type, K: Type, V: Type](res: Expr[String => Option[V]])(using
     Quotes
 ): Expr[Option[V]] =
   import quotes.reflect.report
