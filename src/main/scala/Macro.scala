@@ -30,39 +30,46 @@ def isInTupleImpl[X: Type, T <: Tuple: Type](using Quotes): Expr[Boolean] =
     case _                    => Nil
   Expr(tTypes.exists(_ =:= xType))
 
+// same function as isInTuple, but for union types
+inline def isInUnion[X, U]: Boolean = ${ isInUnionImpl[X, U] }
 
-// A macro named `createClass` that, inputting a list of fields as strings, create a class
-// with a constructor that takes a value for each string in the list.
-
-// example: `createClass[V](List("A", "B", "C"))`
-// output: `class CreatedClass(val a: V, val b: V, val c: V)`
-// NOT possible https://contributors.scala-lang.org/t/scala-3-macro-annotations-and-code-generation/6035
-// inline def createClass[V](fields: List[String]): Any = ${ createClassImpl[V]('fields) }
-// private def createClassImpl[V: Type](fields: Expr[List[String]])(using Quotes): Expr[Any] =
-//   import quotes.reflect.*
-//   val fieldTypes = fields.valueOrError.map { field => TypeRepr.of[V] }
-//   val classDef = TypeDef(
-//     Symbol.classSymbol("CreatedClass"),
-//     TypeDef(
-//       Symbol.classSymbol("val"),
-//       fields.valueOrError.zip(fieldTypes).map { case (field, fieldType) =>
-//       // TypeDef(Symbol.classSymbol(field), fieldType)
-//       // [error]    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//       // [error]    |                Found:    (x$2.reflect.Symbol, x$2.reflect.TypeRepr)
-//       // [error]    |                Required: x$2.reflect.Symbol
-//         //TypeDef(Symbol.classSymbol(field), fieldType)
-//       }
-//     )
-//   )
-//   Expr(classDef)
-
-inline def testUsingHMinMacro: Int = ${ testUsingHMinMacroImpl }
-def testUsingHMinMacroImpl(using Quotes): Expr[Int] =
+private def isInUnionImpl[X: Type, U: Type](using Quotes): Expr[Boolean] =
   import quotes.reflect.*
-  val hm = new java.util.concurrent.ConcurrentHashMap[String, Int]()
-  hm.put("a", 1)
-  Expr(hm.get("a"))
+  // sanity check
+  isUnionSanityCheck[U]
+  // TODO find a way to extract, but using type `TypeRepr` in signature is a pain...
+  // because imported by `quotes.reflect.*` that needs a given Quotes
+  def get(tr: TypeRepr): List[TypeRepr] =
+    tr.dealiasKeepOpaques match
+      case OrType(tpes, tpesB) => get(tpes) ++ get(tpesB)
+      case _                   => List(tr)
 
+  val xType  = TypeRepr.of[X].dealiasKeepOpaques
+  val u      = TypeRepr.of[U].dealiasKeepOpaques
+  val uTypes = get(u)
+  Expr(uTypes.exists(_ =:= xType))
 
-// Question: how to keep global state between macro calls?
-// Answer with code example: use a `val` in the companion object of the macro
+private def isUnionSanityCheck[T: Type](using Quotes): Unit =
+  import quotes.reflect.*
+  val t = TypeRepr.of[T].dealiasKeepOpaques
+  t match
+    case OrType(_, _) => ()
+    case x            => report.errorAndAbort(s"Type ${x.show} is not a union type")
+
+// same function as typeNamesTupleMacro, but for union types
+inline def typeNamesUnion[T]: List[String] = ${ typeNamesUnionImpl[T] }
+private def typeNamesUnionImpl[T: Type](using Quotes): Expr[List[String]] =
+  import quotes.reflect.*
+
+  // sanity check
+  isUnionSanityCheck[T]
+
+  // TODO find a way to extract, but using type `TypeRepr` in signature is a pain...
+  // because imported by `quotes.reflect.*` that needs a given Quotes
+  def get(tr: TypeRepr): List[TypeRepr] =
+    tr.dealiasKeepOpaques match
+      case OrType(tpes, tpesB) => get(tpes) ++ get(tpesB)
+      case _                   => List(tr)
+  val t      = TypeRepr.of[T].dealiasKeepOpaques
+  val tTypes = get(t)
+  Expr(tTypes.map(_.dealiasKeepOpaques.show))

@@ -5,6 +5,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 // https://scalameta.org/munit/docs/getting-started.html
 opaque type IntOpaque = Int
 type Alias            = (Int, String, Float)
+type Union            = String | Int | Float
 
 class MySuite extends munit.FunSuite:
   test("isInTuple") {
@@ -13,26 +14,32 @@ class MySuite extends munit.FunSuite:
     assertEquals(isInTuple[Int, (String, IntOpaque)], false)
   }
 
+  val string = "java.lang.String" // runtime
+  val int    = "scala.Int"
+  val float  = "scala.Float"
+
   test("typeNamesTuple") {
-    val string = "java.lang.String" // runtime
-    val int    = "scala.Int"
-    val float  = "scala.Float"
     assertEquals(typeNamesTuple[(String, Int)], List(string, int))
     assertEquals(typeNamesTuple[(String, IntOpaque)], List(string, "MySuite$package.IntOpaque"))
     assertEquals(typeNamesTuple[Alias], List(int, string, float))
   }
 
   test("typeNamesTupleMacro") {
-    val string = "scala.Predef.String" // compile time
-    val int    = "scala.Int"
-    val float  = "scala.Float"
     assertEquals(typeNamesTupleMacro[(String, Int)], List(string, int))
     assertEquals(typeNamesTupleMacro[(String, IntOpaque)], List(string, "MySuite$package.IntOpaque"))
     assertEquals(typeNamesTupleMacro[Alias], List(int, string, float))
   }
+  test("Union type") {
+    assertEquals(typeNamesUnion[String | Int], List(string, int))
+    assertEquals(typeNamesUnion[String | IntOpaque], List(string, "MySuite$package.IntOpaque"))
+    assertEquals(typeNamesUnion[Int | String | Float], List(int, string, float))
+    assertEquals(typeNamesUnion[Union], List(string, int, float))
+    // does not compile, as expected
+    // assertEquals(typeNamesUnion[Int], List())
+  }
 
   test("TypeMap") {
-    val map: TypeMap[(Int, String), String] = TypeMap.empty
+    val map: TypeMap[Int | String, String] = TypeMap.empty
     map.put[Int]("1")
     assertEquals(map.get[Int], Some("1"))
     assertEquals(map.get[String], None)
