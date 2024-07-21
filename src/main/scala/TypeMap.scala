@@ -19,14 +19,14 @@ class TypeMap[K, V](private val map: Backend[V]):
 def getImpl[T: Type, K: Type, V: Type](
     map: Expr[Backend[V]]
 )(using Quotes): Expr[Option[V]] =
-  opImpl[T, K, V, Option[V]](map, '{ Option(${ map }.get(${ typeNameImpl[T] })) })
+  opImpl[T, K, V, Option[V]]('{ Option(${ map }.get(${ typeNameImpl[T] })) })
 
 def putImpl[T: Type, K: Type, V: Type](map: Expr[Backend[V]], value: Expr[V])(using
     Quotes
 ): Expr[Unit] =
-  opImpl[T, K, V, Unit](map, '{ ${ map }.put(${ typeNameImpl[T] }, ${ value }) })
+  opImpl[T, K, V, Unit]('{ ${ map }.put(${ typeNameImpl[T] }, ${ value }) })
 
-def opImpl[T: Type, K: Type, V: Type, Result](map: Expr[Backend[V]], res: Expr[Result])(using
+def opImpl[T: Type, K: Type, V: Type, Result](res: Expr[Result])(using
     Quotes
 ): Expr[Result] =
   import quotes.reflect.report
