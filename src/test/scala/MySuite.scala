@@ -29,6 +29,7 @@ class MySuite extends munit.FunSuite:
     assertEquals(typeName[OutsidePackage], "OutsidePackage")
     import inside.*
     assertEquals(typeName[InsidePackage], "inside.InsidePackage")
+    assertEquals(typeName[Alias], "scala.Tuple3[scala.Int, scala.Predef.String, scala.Float]")
   }
 
   test("typeNamesTuple") {
