@@ -5,7 +5,7 @@ type CMapBackend = [X] =>> CMap[String, X]
 given [Value]: BackendOps[CMapBackend, Value] with
   private type DS = CMapBackend[Value]
   def empty: DS                                                = new DS()
-  def make(_length: Int): DS                                   = empty
+  def make(length: Int): DS                                    = new DS(length)
   def get(ds: DS, index: Int, key: String): Option[Value]      = Option(ds.get(key))
   def put(ds: DS, index: Int, key: String, value: Value): Unit = ds.put(key, value)
 

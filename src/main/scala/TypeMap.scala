@@ -4,6 +4,7 @@ import scala.quoted.*
 // Intented to be implement on different types of HashMap, List, Vector, etc.
 // generally, DS = F[V]
 trait BackendOps[F[_], V]:
+  // TODO, not used anymore, remove
   def empty: F[V]
   def make(length: Int): F[V]
   // depending on the underlying backend, the index or key will be used

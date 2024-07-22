@@ -6,6 +6,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 opaque type IntOpaque = Int
 type Alias            = (Int, String, Float)
 type Union            = String | Int | Float
+type Union2           = String | Int | Float | Int | Int
 
 class MySuite extends munit.FunSuite:
   test("isInTuple") {
@@ -35,7 +36,12 @@ class MySuite extends munit.FunSuite:
     assertEquals(typeNamesUnion[Int | String | Float], List(int, string, float))
     assertEquals(typeNamesUnion[Union], List(string, int, float))
     // does not compile, as expected
-    // assertEquals(typeNamesUnion[Int], List())
+    assertNoDiff(
+      compileErrors("typeNamesUnion[Int]"),
+      """error: Type scala.Int is not a union type
+      compileErrors("typeNamesUnion[Int]"),
+                  ^""".stripMargin
+    )
   }
   test("TypeMap, CMapBackend") {
     val map: TypeMap[Int | String, String, CMapBackend] = TypeMap.empty
@@ -43,7 +49,12 @@ class MySuite extends munit.FunSuite:
     assertEquals(map.get[Int], Some("1"))
     assertEquals(map.get[String], None)
     // does not compile, as expected
-    // assertEquals(map.get[Float], None)
+    assertNoDiff(
+      compileErrors("map.get[Float]"),
+      """error: Type scala.Float not found in union scala.Int | scala.Predef.String
+      compileErrors("map.get[Float]"),
+                  ^""".stripMargin
+    )
   }
 
   test("Bus") {
