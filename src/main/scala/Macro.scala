@@ -3,8 +3,8 @@ import scala.compiletime.*
 
 // from https://stackoverflow.com/questions/70026258/scala-3-macros-how-do-i-get-name-of-generic-type-with-quoted-type
 inline def typeName[A]: String = ${ typeNameImpl[A] }
-private def typeNameImpl[A](using Type[A], Quotes): Expr[String] =
-  Expr(Type.show[A])
+private def typeNameImpl[A: Type](using Quotes): Expr[String] =
+  Expr(quotes.reflect.TypeRepr.of[A].dealiasKeepOpaques.show)
 
 inline def typeNamesTuple[T <: Tuple]: List[String] =
   inline erasedValue[T] match

@@ -7,6 +7,9 @@ opaque type IntOpaque = Int
 type Alias            = (Int, String, Float)
 type Union            = String | Int | Float
 type Union2           = String | Int | Float | Int | Int
+case class OutsidePackage(i: Int);
+package inside:
+  case class InsidePackage(x: String)
 
 class MySuite extends munit.FunSuite:
   test("isInTuple") {
@@ -18,6 +21,15 @@ class MySuite extends munit.FunSuite:
   val string = "java.lang.String" // runtime
   val int    = "scala.Int"
   val float  = "scala.Float"
+
+  test("typeName") {
+    assertEquals(typeName[Int], int)
+    assertEquals(typeName[String], string)
+    assertEquals(typeName[Float], float)
+    assertEquals(typeName[OutsidePackage], "OutsidePackage")
+    import inside.*
+    assertEquals(typeName[InsidePackage], "inside.InsidePackage")
+  }
 
   test("typeNamesTuple") {
     assertEquals(typeNamesTuple[(String, Int)], List(string, int))
