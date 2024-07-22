@@ -37,12 +37,6 @@ private def isInUnionImpl[X: Type, U: Type](using Quotes): Expr[Boolean] =
   import quotes.reflect.*
   // sanity check
   isUnionSanityCheck[U]
-  // TODO find a way to extract, but using type `TypeRepr` in signature is a pain...
-  // because imported by `quotes.reflect.*` that needs a given Quotes
-  def get(tr: TypeRepr): List[TypeRepr] =
-    tr.dealiasKeepOpaques match
-      case OrType(tpes, tpesB) => get(tpes) ++ get(tpesB)
-      case _                   => List(tr)
 
   val xType  = TypeRepr.of[X].dealiasKeepOpaques
   val u      = TypeRepr.of[U].dealiasKeepOpaques
@@ -53,12 +47,6 @@ def unionLengthImpl[U: Type](using Quotes): Expr[Int] =
   import quotes.reflect.*
   // sanity check
   isUnionSanityCheck[U]
-  // TODO find a way to extract, but using type `TypeRepr` in signature is a pain...
-  // because imported by `quotes.reflect.*` that needs a given Quotes
-  def get(tr: TypeRepr): List[TypeRepr] =
-    tr.dealiasKeepOpaques match
-      case OrType(tpes, tpesB) => get(tpes) ++ get(tpesB)
-      case _                   => List(tr)
 
   val uTypes = get(TypeRepr.of[U].dealiasKeepOpaques)
   Expr(uTypes.length)
@@ -69,12 +57,6 @@ private def indexInUnionImpl[X: Type, U: Type](using Quotes): Expr[Int] =
   import quotes.reflect.*
   // sanity check
   isUnionSanityCheck[U]
-  // TODO find a way to extract, but using type `TypeRepr` in signature is a pain...
-  // because imported by `quotes.reflect.*` that needs a given Quotes
-  def get(tr: TypeRepr): List[TypeRepr] =
-    tr.dealiasKeepOpaques match
-      case OrType(tpes, tpesB) => get(tpes) ++ get(tpesB)
-      case _                   => List(tr)
 
   val xType  = TypeRepr.of[X].dealiasKeepOpaques
   val u      = TypeRepr.of[U].dealiasKeepOpaques
@@ -99,12 +81,15 @@ def typeNamesUnionImpl[T: Type](using Quotes): Expr[List[String]] =
   // sanity check
   isUnionSanityCheck[T]
 
-  // TODO find a way to extract, but using type `TypeRepr` in signature is a pain...
-  // because imported by `quotes.reflect.*` that needs a given Quotes
-  def get(tr: TypeRepr): List[TypeRepr] =
-    tr.dealiasKeepOpaques match
-      case OrType(tpes, tpesB) => get(tpes) ++ get(tpesB)
-      case _                   => List(tr)
   val t      = TypeRepr.of[T].dealiasKeepOpaques
   val tTypes = get(t)
   Expr(tTypes.map(_.dealiasKeepOpaques.show))
+
+// This weird outer function is necessary to use `TypeRepr` in the signature
+def get(using Quotes) =
+  import quotes.reflect.*
+  def getInner(tr: TypeRepr): List[TypeRepr] =
+    tr.dealiasKeepOpaques match
+      case OrType(tpes, tpesB) => getInner(tpes) ++ getInner(tpesB)
+      case _                   => List(tr)
+  getInner
