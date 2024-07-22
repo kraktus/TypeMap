@@ -6,7 +6,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 opaque type IntOpaque = Int
 type Alias            = (Int, String, Float)
 type Union            = String | Int | Float
-type Union2           = String | Int | Float | Int | Int
+type UnionDup         = String | Int | Float | Int
 case class OutsidePackage(i: Int);
 package inside:
   case class InsidePackage(x: String)
@@ -53,6 +53,17 @@ class MySuite extends munit.FunSuite:
       compileErrors("typeNamesUnion[Int]"),
       """error: Type scala.Int is not a union type
       compileErrors("typeNamesUnion[Int]"),
+                  ^""".stripMargin
+    )
+  }
+  test("Canonical Union") {
+    // should compile fine
+    isUnionCanonical[String | Int]
+    isUnionCanonical[Union]
+    assertNoDiff(
+      compileErrors("isUnionCanonical[UnionDup]"),
+      """error: Type scala.Int multiple times in union scala.Predef.String | scala.Int | scala.Float | scala.Int
+      compileErrors("isUnionCanonical[UnionDup]"),
                   ^""".stripMargin
     )
   }
