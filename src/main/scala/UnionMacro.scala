@@ -10,7 +10,7 @@ private def isInUnionImpl[X: Type, U: Type](using Quotes): Expr[Boolean] =
 
   val xType  = TypeRepr.of[X].dealiasKeepOpaques
   val u      = TypeRepr.of[U].dealiasKeepOpaques
-  val uTypes = get(u)
+  val uTypes = listUnionRepr(u)
   Expr(uTypes.exists(_ =:= xType))
 
 def unionLengthImpl[U: Type](using Quotes): Expr[Int] =
@@ -18,7 +18,7 @@ def unionLengthImpl[U: Type](using Quotes): Expr[Int] =
   // sanity check
   isUnionSanityCheck[U]
 
-  val uTypes = get(TypeRepr.of[U].dealiasKeepOpaques)
+  val uTypes = listUnionRepr(TypeRepr.of[U].dealiasKeepOpaques)
   Expr(uTypes.length)
 
 inline def indexInUnion[X, U]: Int = ${ indexInUnionImpl[X, U] }
@@ -30,7 +30,7 @@ private def indexInUnionImpl[X: Type, U: Type](using Quotes): Expr[Int] =
 
   val xType  = TypeRepr.of[X].dealiasKeepOpaques
   val u      = TypeRepr.of[U].dealiasKeepOpaques
-  val uTypes = get(u)
+  val uTypes = listUnionRepr(u)
   val index = uTypes.zipWithIndex.find(_._1 =:= xType).map(_._2) match
     case Some(idx) => idx
     case None      => report.errorAndAbort(s"Type ${xType.show} not found in union ${u.show}")
@@ -44,22 +44,23 @@ private def isUnionSanityCheck[T: Type](using Quotes): Unit =
     case x            => report.errorAndAbort(s"Type ${x.show} is not a union type")
 
 // same function as typeNamesTupleMacro, but for union types
-inline def typeNamesUnion[T]: List[String] = ${ typeNamesUnionImpl[T] }
-def typeNamesUnionImpl[T: Type](using Quotes): Expr[List[String]] =
+inline def typeNamesUnion[U]: List[String] = ${ typeNamesUnionImpl[U] }
+def typeNamesUnionImpl[U: Type](using q: Quotes): Expr[List[String]] =
   import quotes.reflect.*
+  val f: List[quotes.reflect.TypeRepr] => List[String] = x => x.map(_.dealiasKeepOpaques.show)
+  Expr(commonImpl[U, List[String]](_.map(_.dealiasKeepOpaques.show)))
+
+
+private def commonImpl[U: Type, Result](using Quotes)(f: List[quotes.reflect.TypeRepr] => Result): Result =
+  import quotes.reflect.*
+  def listUnionReprInner(tr: TypeRepr): List[TypeRepr] =
+    tr.dealiasKeepOpaques match
+      case OrType(tpes, tpesB) => listUnionReprInner(tpes) ++ listUnionReprInner(tpesB)
+      case _                   => List(tr)
 
   // sanity check
-  isUnionSanityCheck[T]
+  isUnionSanityCheck[U]
+  val u = TypeRepr.of[U].dealiasKeepOpaques
+  val uTypes = listUnionReprInner(u)
+  f(uTypes)
 
-  val t      = TypeRepr.of[T].dealiasKeepOpaques
-  val tTypes = get(t)
-  Expr(tTypes.map(_.dealiasKeepOpaques.show))
-
-// This weird outer function is necessary to use `TypeRepr` in the signature
-private def get(using Quotes) =
-  import quotes.reflect.*
-  def inner(tr: TypeRepr): List[TypeRepr] =
-    tr.dealiasKeepOpaques match
-      case OrType(tpes, tpesB) => inner(tpes) ++ inner(tpesB)
-      case _                   => List(tr)
-  inner
