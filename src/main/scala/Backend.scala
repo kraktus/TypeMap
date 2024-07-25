@@ -2,7 +2,7 @@ import java.util.concurrent.ConcurrentHashMap as CMap
 import scala.collection.mutable.ArrayBuffer
 
 type CMapBackend = [X] =>> CMap[String, X]
-given [Value]: BackendOps[CMapBackend, Value] with
+given [Value]: MapOps[CMapBackend, Value] with
   private type DS = CMapBackend[Value]
   def empty: DS                                                = new DS()
   def make(length: Int): DS                                    = new DS(length)
@@ -10,7 +10,7 @@ given [Value]: BackendOps[CMapBackend, Value] with
   def put(ds: DS, index: Int, key: String, value: Value): Unit = ds.put(key, value)
 
 type ArrayBufferBackend = [X] =>> ArrayBuffer[Option[X]]
-given [Value]: BackendOps[ArrayBufferBackend, Value] with
+given [Value]: MapOps[ArrayBufferBackend, Value] with
   private type DS = ArrayBufferBackend[Value]
   def empty: DS                                                = ArrayBuffer.empty
   def make(length: Int): DS                                    = ArrayBuffer.fill(length)(None)

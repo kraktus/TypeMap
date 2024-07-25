@@ -3,7 +3,7 @@ import scala.quoted.*
 // A general trait over the backend data structure
 // Intented to be implement on different types of HashMap, List, Vector, etc.
 // generally, DS = F[V]
-trait BackendOps[F[_], V]:
+trait MapOps[F[_], V]:
   // TODO, not used anymore, remove
   def empty: F[V]
   def make(length: Int): F[V]
@@ -15,10 +15,10 @@ trait BackendOps[F[_], V]:
 
 // associate a value of type V to each type in the tuple K
 // TODO use PHF
-class TypeMap[K, V, F[_]](private val map: F[V])(using bops: BackendOps[F, V]):
+class TypeMap[K, V, F[_]](private val map: F[V])(using ops: MapOps[F, V]):
 
-  inline def get[T]: Option[V]      = ${ opImpl[T, K, V, Option[V]]('{ bops.get(map, _, _) }) }
-  inline def put[T](value: V): Unit = ${ opImpl[T, K, V, Unit]('{ bops.put(map, _, _, value) }) }
+  inline def get[T]: Option[V]      = ${ opImpl[T, K, V, Option[V]]('{ ops.get(map, _, _) }) }
+  inline def put[T](value: V): Unit = ${ opImpl[T, K, V, Unit]('{ ops.put(map, _, _, value) }) }
 
 def opImpl[T: Type, K: Type, V: Type, Result: Type](res: Expr[(Int, String) => Result])(using
     Quotes
@@ -29,8 +29,8 @@ def opImpl[T: Type, K: Type, V: Type, Result: Type](res: Expr[(Int, String) => R
     case Expr(false) => report.errorAndAbort(s"Type ${Type.show[T]} not found in union ${Type.show[K]}")
 
 object TypeMap:
-  inline def empty[K, V, F[_]](using ds: BackendOps[F, V]): TypeMap[K, V, F] = ${ emptyImpl[K, V, F]('ds) }
-  def emptyImpl[K: Type, V: Type, F[_]: Type](ds: Expr[BackendOps[F, V]])(using
+  inline def empty[K, V, F[_]](using ops: MapOps[F, V]): TypeMap[K, V, F] = ${ emptyImpl[K, V, F]('ops) }
+  def emptyImpl[K: Type, V: Type, F[_]: Type](opsE: Expr[MapOps[F, V]])(using
       Quotes
   ): Expr[TypeMap[K, V, F]] =
-    '{ TypeMap[K, V, F](${ ds }.make(${ unionLengthImpl[K] }))(using ${ ds }) }
+    '{ TypeMap[K, V, F](${ opsE }.make(${ unionLengthImpl[K] }))(using ${ opsE }) }
