@@ -15,6 +15,8 @@ enum Foo:
 object Bus:
   private type Keys  = A | B | C | D | Foo
   private type Value = Set[PartialFunction[Keys, Unit]]
+  // also possible with a mutable typemap
+  // val map: MutableTypeMap[Value, CMapBackend] = MutableTypeMap.empty
   val map: TypeMap[Keys, Value, CMapBackend] = TypeMap.empty
 
   inline def publish[T <: Keys](t: T): Unit = map.get[T].foreach(_.foreach(_.apply(t)))
