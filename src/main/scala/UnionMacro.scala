@@ -1,3 +1,5 @@
+package typemap
+
 import scala.quoted.*
 
 // same function as isInTuple, but for union types

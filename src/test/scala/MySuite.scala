@@ -1,3 +1,5 @@
+import typemap.{ *, given }
+
 import scala.concurrent.{ Future, Promise, ExecutionContext }
 import scala.concurrent.ExecutionContext.Implicits.global
 

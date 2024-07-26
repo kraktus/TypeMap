@@ -1,3 +1,5 @@
+package typemap
+
 import scala.concurrent.{ Future, Promise, ExecutionContext }
 import scala.concurrent.ExecutionContext.Implicits.global
 import java.util.concurrent.ConcurrentHashMap as CMap

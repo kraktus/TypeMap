@@ -1,11 +1,11 @@
+package typemap
+
 import scala.quoted.*
 
 // A general trait over the backend data structure
 // Intented to be implement on different types of HashMap, List, Vector, etc.
 // generally, DS = F[V]
 trait MapOps[F[_], V]:
-  // TODO, not used anymore, remove
-  def empty: F[V]
   def make(length: Int): F[V]
   // depending on the underlying backend, the index or key will be used
   // index of the type `T` in the type union `K` of `TypeMap`
