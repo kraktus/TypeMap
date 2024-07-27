@@ -13,7 +13,6 @@ trait MutableMapOps[F[_], V]:
   def put(ds: F[V], key: String, value: V): Unit
 
 // implement `MapOps` for all types implementing `MutableMapOps`
-// type MutableBackend = [F[_]] =>> [V] =>> MutableMapOps[F, V]
 given [F[_], V](using mutOps: MutableMapOps[F, V]): MapOps[F, V] with
   def make(length: Int): F[V]                                = mutOps.make(length)
   def get(ds: F[V], index: Int, key: String): Option[V]      = mutOps.get(ds, key)

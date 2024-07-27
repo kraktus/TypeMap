@@ -110,3 +110,14 @@ class MySuite extends munit.FunSuite:
     assertEquals(fooResult, Some(foo))
     Bus.ask[Int, D](D(6, _)).foreach { x => assertEquals(x, 48) }
   }
+
+  test("MutableTypeMap") {
+    val map: MutableTypeMap[Int, CMapBackend] = MutableTypeMap.empty
+    map.put[String](1)
+    map.put[Float](2)
+    map.put[A](3)
+    assertEquals(map.get[String], Some(1))
+    assertEquals(map.get[Float], Some(2))
+    assertEquals(map.get[A], Some(3))
+    assertEquals(map.get[B], None)
+  }

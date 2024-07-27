@@ -57,8 +57,7 @@ private def isUnionCanonicalImpl[U: Type](using Quotes): Expr[Unit] =
   def inner[U: Type](s: Set[TypeRepr], tr: TypeRepr): Set[TypeRepr] =
     tr.dealiasKeepOpaques match
       case OrType(a, b) =>
-        val ss = inner[U](s, a)
-        inner[U](ss, b)
+        inner[U](inner[U](s, a), b)
       case x if s.contains(x) =>
         report.errorAndAbort(s"Type ${x.show} multiple times (CHECK ALIASES) in union ${u.show}")
       case x => s + x
