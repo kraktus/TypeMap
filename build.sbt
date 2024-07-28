@@ -1,11 +1,12 @@
-val scala3Version = "3.4.2"
+ThisBuild / version           := "0.1.0-SNAPSHOT"
+ThisBuild / scalaVersion      := "3.4.2"
 
 // from scalachess
 val commonSettings = Seq(
   scalacOptions := Seq(
     "-encoding",
     "utf-8",
-    "-source:future-migration",
+    // "-source:future-migration",
     "-indent",
     "-feature",
     // "-language:postfixOps",
@@ -18,14 +19,18 @@ val commonSettings = Seq(
 )
 
 
-lazy val root = project
+lazy val typemap = project
   .in(file("."))
   .settings(
     commonSettings,
     name := "typemap",
-    version := "0.1.0-SNAPSHOT",
-
-    scalaVersion := scala3Version,
-
     libraryDependencies += "org.scalameta" %% "munit" % "1.0.0" % Test
   )
+
+
+lazy val examples = project
+  .in(file("examples"))
+  .settings(
+    commonSettings,
+  )
+  .dependsOn(typemap, typemap % "compile->test")

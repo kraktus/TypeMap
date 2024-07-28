@@ -13,7 +13,7 @@ case class OutsidePackage(i: Int);
 package inside:
   case class InsidePackage(x: String)
 
-class MySuite extends munit.FunSuite:
+class TypeMapTest extends munit.FunSuite:
   test("isInTuple") {
     assertEquals(isInTuple[Int, (String, Int)], true)
     assertEquals(isInTuple[Int, Alias], true)
