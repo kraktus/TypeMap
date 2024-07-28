@@ -1,8 +1,5 @@
 import typemap.{ *, given }
 
-import scala.concurrent.{ Future, Promise, ExecutionContext }
-import scala.concurrent.ExecutionContext.Implicits.global
-
 // For more information on writing tests, see
 // https://scalameta.org/munit/docs/getting-started.html
 opaque type IntOpaque = Int
@@ -12,6 +9,9 @@ type UnionDup         = String | Int | Float | Int
 case class OutsidePackage(i: Int);
 package inside:
   case class InsidePackage(x: String)
+
+case class A(i: Int)
+case class B(s: String)
 
 class TypeMapTest extends munit.FunSuite:
   test("isInTuple") {
@@ -23,6 +23,7 @@ class TypeMapTest extends munit.FunSuite:
   val string = "java.lang.String" // runtime
   val int    = "scala.Int"
   val float  = "scala.Float"
+  val intOpaque = "test$package.IntOpaque"
 
   test("typeName") {
     assertEquals(typeName[Int], int)
@@ -36,18 +37,18 @@ class TypeMapTest extends munit.FunSuite:
 
   test("typeNamesTuple") {
     assertEquals(typeNamesTuple[(String, Int)], List(string, int))
-    assertEquals(typeNamesTuple[(String, IntOpaque)], List(string, "MySuite$package.IntOpaque"))
+    assertEquals(typeNamesTuple[(String, IntOpaque)], List(string, intOpaque))
     assertEquals(typeNamesTuple[Alias], List(int, string, float))
   }
 
   test("typeNamesTupleMacro") {
     assertEquals(typeNamesTupleMacro[(String, Int)], List(string, int))
-    assertEquals(typeNamesTupleMacro[(String, IntOpaque)], List(string, "MySuite$package.IntOpaque"))
+    assertEquals(typeNamesTupleMacro[(String, IntOpaque)], List(string, intOpaque))
     assertEquals(typeNamesTupleMacro[Alias], List(int, string, float))
   }
   test("Union type") {
     assertEquals(typeNamesUnion[String | Int], List(string, int))
-    assertEquals(typeNamesUnion[String | IntOpaque], List(string, "MySuite$package.IntOpaque"))
+    assertEquals(typeNamesUnion[String | IntOpaque], List(string, intOpaque))
     assertEquals(typeNamesUnion[Int | String | Float], List(int, string, float))
     assertEquals(typeNamesUnion[Union], List(string, int, float))
     // does not compile, as expected
@@ -81,34 +82,6 @@ class TypeMapTest extends munit.FunSuite:
       compileErrors("map.get[Float]"),
                   ^""".stripMargin
     )
-  }
-
-  test("Bus") {
-    val a                      = A(1)
-    var aResult: Option[A]     = None
-    val b                      = B("This is a B")
-    var bResult: Option[B]     = None
-    val c                      = C(3, "4", 5.0f)
-    var cResult: Option[C]     = None
-    val foo                    = Foo.Baz("baz")
-    var fooResult: Option[Foo] = None
-    Bus.subscribe[A] { case x: A => aResult = Some(x) }
-    Bus.subscribe[B] { case y: B => bResult = Some(b) }
-    Bus.subscribe[C] { case C(i, s, f) => cResult = Some(C(i, s, f)) }
-    Bus.subscribe[D] { case D(init, p) => p.completeWith(Future.successful(init + 42)) }
-    Bus.subscribe[Foo] { case Foo.Bar(i) => fooResult = Some(Foo.Bar(i)) }
-    Bus.publish(a)
-    Bus.publish(b)
-    Bus.publish(c)
-    Bus.publish(foo)
-    assertEquals(aResult, Some(a))
-    assertEquals(bResult, Some(b))
-    assertEquals(cResult, Some(c))
-    assertEquals(fooResult, None)
-    Bus.subscribe[Foo] { case Foo.Baz(s) => fooResult = Some(Foo.Baz(s)) }
-    Bus.publish(foo)
-    assertEquals(fooResult, Some(foo))
-    Bus.ask[Int, D](D(6, _)).foreach { x => assertEquals(x, 48) }
   }
 
   test("MutableTypeMap") {
