@@ -1,9 +1,8 @@
 package examples
-import typemap.{TypeMap, CMapBackend, typeName, given}
+import typemap.{ TypeMap, CMapBackend, typeName, given }
 
 import scala.concurrent.{ Future, Promise, ExecutionContext }
 import java.util.concurrent.ConcurrentHashMap as CMap
-
 
 case class A(i: Int)
 case class B(s: String)

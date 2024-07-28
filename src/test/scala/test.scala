@@ -20,9 +20,9 @@ class TypeMapTest extends munit.FunSuite:
     assertEquals(isInTuple[Int, (String, IntOpaque)], false)
   }
 
-  val string = "java.lang.String" // runtime
-  val int    = "scala.Int"
-  val float  = "scala.Float"
+  val string    = "java.lang.String" // runtime
+  val int       = "scala.Int"
+  val float     = "scala.Float"
   val intOpaque = "test$package.IntOpaque"
 
   test("typeName") {

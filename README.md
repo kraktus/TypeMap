@@ -2,6 +2,50 @@
 
 This project is a simple implementation of a type-level map in Scala3, using macros. Inspired by the rust crate [`anymap`](https://docs.rs/anymap/latest/anymap/).
 
+
+### INSTALL
+
+Clone typemap
+```
+$ git clone https://github.com/kraktus/typemap
+```
+Start [sbt](http://www.scala-sbt.org/download.html) in typemap directory
+```
+$ sbt
+```
+In the sbt shell, to compile typemap, run
+```
+sbt:typemap> compile
+```
+To run the tests
+```
+sbt:typemap> test
+```
+To compile or test the examples
+```
+sbt:typemap> examples / compile (or test)
+```
+To run benchmarks:
+```
+sbt:typemap> bench / Jmh / run
+```
+Or to ouput a json file
+```
+sbt:typemap> bench / Jmh / run -rf json
+```
+To run quick benchmarks (results may be inaccurate):
+```
+sbt:typemap> bench / Jmh / run -i 1 -wi 1 -f1 -t1
+```
+To run benchmarks for a specific class:
+```
+sbt:typemap> bench / Jmh / run -rf json .*PlayBench.*
+```
+To run [scalafmt](https://scalameta.org/scalafmt/docs/installation.html):
+```
+sbt:typemap> fmt
+```
+
 ### Usage
 
 ```scala

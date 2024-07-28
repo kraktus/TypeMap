@@ -34,3 +34,11 @@ lazy val examples = project
     commonSettings,
   )
   .dependsOn(typemap, typemap % "compile->test")
+
+
+lazy val bench = project
+  .enablePlugins(JmhPlugin)
+  .settings(commonSettings, name := "bench")
+  .dependsOn(typemap, typemap % "compile->test")
+
+addCommandAlias("fmt", "all typemap/scalafmtAll examples/scalafmtAll bench/scalafmtAll")
