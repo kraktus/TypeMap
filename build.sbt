@@ -42,3 +42,4 @@ lazy val bench = project
   .dependsOn(typemap, typemap % "compile->test")
 
 addCommandAlias("fmt", "all typemap/scalafmtAll examples/scalafmtAll bench/scalafmtAll")
+addCommandAlias("test", "all typemap/test examples/test")
