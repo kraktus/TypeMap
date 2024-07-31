@@ -44,6 +44,7 @@ lazy val bench = project
 
 val toAllProjects = (cmd: String) => s"all typemap/$cmd examples/$cmd bench/$cmd"
 
+addCommandAlias("build", toAllProjects("compile"))
 addCommandAlias("fmt", toAllProjects("scalafmtAll"))
 addCommandAlias("fmtCheck", toAllProjects("scalafmtCheckAll"))
 addCommandAlias("test", toAllProjects("test"))
