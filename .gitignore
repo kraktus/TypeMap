@@ -31,3 +31,7 @@ metals.sbt
 .idea
 .idea_modules
 /.worksheet/
+
+# jmh
+# bench/jmh-result.json
+jmh-result.json

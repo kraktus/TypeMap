@@ -4,8 +4,6 @@ import typemap.{ TypeMap, CMapBackend, typeName, given }
 import scala.concurrent.{ Future, Promise, ExecutionContext }
 import java.util.concurrent.ConcurrentHashMap as CMap
 
-case class A(i: Int)
-case class B(s: String)
 case class C(i: Int, s: String, f: Float)
 case class D(init: Int, p: Promise[Int])
 enum Foo:
