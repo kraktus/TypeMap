@@ -12,6 +12,10 @@ trait MapOps[F[_], V]:
   // TODO can index be using a opaque type in macro?
   def get(ds: F[V], index: Int, key: String): Option[V]
   def put(ds: F[V], index: Int, key: String, value: V): Unit
+  // If your backend is thread-safe, you can provide a thread-safe implementation
+  def compute(ds: F[V], index: Int, key: String, f: V => V): V
+  def computeIfAbsent(ds: F[V], index: Int, key: String, f: => V): V
+  def computeIfPresent(ds: F[V], index: Int, key: String, f: V => V): Option[V]
 
 // associate a value of type V to each type in the tuple K
 // TODO use PHF

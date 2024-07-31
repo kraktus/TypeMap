@@ -7,7 +7,7 @@ on:
     branches: ['**']
 
 jobs:
-  openjdk21:
+  test:
     runs-on: ubuntu-latest
     env:
       JAVA_OPTS: "-Xmx6G -XX:+UseG1GC"
@@ -24,11 +24,45 @@ jobs:
           java-version: 21
           cache: sbt
 
-      - name: Build
-        run: sbt build
-
       - name: Test
         run: sbt test
+
+  compile:
+    runs-on: ubuntu-latest
+    env:
+      JAVA_OPTS: "-Xmx6G -XX:+UseG1GC"
+      SBT_OPTS: "-Dsbt.ci=true"
+    steps:
+
+      - name: Checkout current branch
+        uses: actions/checkout@v4
+
+      - name: Setup JVM
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: sbt
+
+      - name: compile
+        # alias to build everything
+        run: sbt build
+
+  format:
+    runs-on: ubuntu-latest
+    env:
+      SBT_OPTS: "-Dsbt.ci=true"
+    steps:
+
+      - name: Checkout current branch
+        uses: actions/checkout@v4
+
+      - name: Setup JVM
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: sbt
 
       - name: Check Formatting
         run: sbt fmtCheck
