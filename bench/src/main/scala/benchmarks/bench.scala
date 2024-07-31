@@ -24,10 +24,10 @@ class TypeMapBenchmark:
   @Setup
   def setup() =
     tmap = backend match
-      case "cmap"        => TypeMap.empty[Keys, String, CMapBackend]
-      case "arraySeq"    => TypeMap.empty[Keys, String, ArraySeqBackend]
-      case "cowArray"    => TypeMap.empty[Keys, String, CowArrayBackend]
-      case _             => ???
+      case "cmap"     => TypeMap.empty[Keys, String, CMapBackend]
+      case "arraySeq" => TypeMap.empty[Keys, String, ArraySeqBackend]
+      case "cowArray" => TypeMap.empty[Keys, String, CowArrayBackend]
+      case _          => ???
 
     tmap.put[Int]("1")
     tmap.put[String]("2")

@@ -32,6 +32,7 @@ lazy val examples = project
   .in(file("examples"))
   .settings(
     commonSettings,
+    name := "examples"
   )
   .dependsOn(typemap, typemap % "compile->test")
 
@@ -41,5 +42,8 @@ lazy val bench = project
   .settings(commonSettings, name := "bench")
   .dependsOn(typemap, typemap % "compile->test")
 
-addCommandAlias("fmt", "all typemap/scalafmtAll examples/scalafmtAll bench/scalafmtAll")
-addCommandAlias("test", "all typemap/test examples/test")
+val toAllProjects = (cmd: String) => s"all typemap/$cmd examples/$cmd bench/$cmd"
+
+addCommandAlias("fmt", toAllProjects("scalafmtAll"))
+addCommandAlias("fmtCheck", toAllProjects("scalafmtCheckAll"))
+addCommandAlias("test", toAllProjects("test"))
