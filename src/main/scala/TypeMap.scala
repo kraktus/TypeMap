@@ -13,9 +13,10 @@ trait MapOps[F[_], V]:
   def get(ds: F[V], index: Int, key: String): Option[V]
   def put(ds: F[V], index: Int, key: String, value: V): Unit
   // If your backend is thread-safe, you can provide a thread-safe implementation
-  def compute(ds: F[V], index: Int, key: String, f: V => V): V
+  // also store the result of the computation
   def computeIfAbsent(ds: F[V], index: Int, key: String, f: => V): V
   def computeIfPresent(ds: F[V], index: Int, key: String, f: V => V): Option[V]
+  def compute(ds: F[V], index: Int, key: String, f: Option[V] => V): V
 
 // associate a value of type V to each type in the tuple K
 // TODO use PHF
@@ -23,6 +24,11 @@ class TypeMap[K, V, F[_]](private val map: F[V])(using ops: MapOps[F, V]):
 
   inline def get[T]: Option[V]      = ${ opImpl[T, K, V, Option[V]]('{ ops.get(map, _, _) }) }
   inline def put[T](value: V): Unit = ${ opImpl[T, K, V, Unit]('{ ops.put(map, _, _, value) }) }
+  inline def computeIfPresent[T](f: V => V): Option[V] = ${
+    opImpl[T, K, V, Option[V]]('{ ops.computeIfPresent(map, _, _, f) })
+  }
+  inline def compute[T](f: Option[V] => V): V = ${ opImpl[T, K, V, V]('{ ops.compute(map, _, _, f) }) }
+  def unsafeMap: F[V] = map
 
 def opImpl[T: Type, K: Type, V: Type, Result: Type](res: Expr[(Int, String) => Result])(using
     Quotes
