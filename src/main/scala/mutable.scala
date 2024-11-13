@@ -6,7 +6,7 @@ import scala.quoted.*
 // Intented to be implement on different types of HashMap, List, Vector, etc.
 // generally, DS = F[V]
 trait MutableMapOps[F[_], V]:
-  // for compatibility with `MapOps
+  // for compatibility with `MapOps`
   def make(length: Int): F[V]
   // TODO can index be using a opaque type in macro?
   def get(ds: F[V], key: String): Option[V]
@@ -30,12 +30,22 @@ given [F[_], V](using mutOps: MutableMapOps[F, V]): MapOps[F, V] with
   def get(ds: F[V], index: Int, key: String): Option[V]      = mutOps.get(ds, key)
   def put(ds: F[V], index: Int, key: String, value: V): Unit = mutOps.put(ds, key, value)
 
-// associate a value of type V to each type in the tuple K
-// TODO use PHF
 class MutableTypeMap[V, F[_]](private val map: F[V])(using ops: MutableMapOps[F, V]):
 
   inline def get[T]: Option[V]      = ${ mutableOpImpl[T, V, Option[V]]('{ ops.get(map, _) }) }
   inline def put[T](value: V): Unit = ${ mutableOpImpl[T, V, Unit]('{ ops.put(map, _, value) }) }
+
+  inline def computeIfAbsent[T](f: => V)(using tsOps: ThreadSafeMutableMapOps[F, V]): V = ${
+    mutableOpImpl[T, V, V]('{ tsOps.computeIfAbsent(map, _, f) })
+  }
+  inline def computeIfPresent[T](f: V => V)(using tsOps: ThreadSafeMutableMapOps[F, V]): Option[V] = ${
+    mutableOpImpl[T, V, Option[V]]('{ tsOps.computeIfPresent(map, _, f) })
+  }
+  inline def compute[T](f: Option[V] => V)(using tsOps: ThreadSafeMutableMapOps[F, V]): V = ${
+    mutableOpImpl[T, V, V]('{ tsOps.compute(map, _, f) })
+  }
+
+  def unsafeMap: F[V] = map
 
 def mutableOpImpl[T: Type, V: Type, Result: Type](res: Expr[String => Result])(using
     Quotes
