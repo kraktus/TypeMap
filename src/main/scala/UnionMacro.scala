@@ -59,7 +59,7 @@ private def isUnionCanonicalImpl[U: Type](using Quotes): Expr[Unit] =
       case OrType(a, b) =>
         inner[U](inner[U](s, a), b)
       case x if s.contains(x) =>
-        report.errorAndAbort(s"Type ${x.show} multiple times (CHECK ALIASES) in union ${u.show}")
+        report.errorAndAbort(s"Type ${x.show} found multiple times (CHECK ALIASES) in union ${u.show}")
       case x => s + x
 
   inner(Set.empty, u)

@@ -65,7 +65,7 @@ class TypeMapTest extends munit.FunSuite:
     isUnionCanonical[Union]
     assertNoDiff(
       compileErrors("isUnionCanonical[UnionDup]"),
-      """error: Type scala.Int multiple times (CHECK ALIASES) in union scala.Predef.String | scala.Int | scala.Float | scala.Int
+      """error: Type scala.Int found multiple times (CHECK ALIASES) in union scala.Predef.String | scala.Int | scala.Float | scala.Int
       compileErrors("isUnionCanonical[UnionDup]"),
                   ^""".stripMargin
     )
