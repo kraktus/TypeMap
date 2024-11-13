@@ -28,9 +28,8 @@ object Bus:
       // error because events are based by types
       case y => println(s"Subscribe error: Incorrect message type, wanted: ${typeName[T]}, received: $y")
     }
-    //map.computeIfA[T](map.get[T].fold(Set(buseableFunction))(_ + buseableFunction))
+    // map.computeIfA[T](map.get[T].fold(Set(buseableFunction))(_ + buseableFunction))
     map.compute[T](vOpt => vOpt.fold(Set(buseableFunction))(_ + buseableFunction))
-
 
   inline def ask[A, T <: Keys](makeMsg: Promise[A] => T)(using
       ExecutionContext
