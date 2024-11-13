@@ -13,9 +13,9 @@ Start [sbt](http://www.scala-sbt.org/download.html) in typemap directory
 ```
 $ sbt
 ```
-In the sbt shell, to compile typemap, run
+In the sbt shell, to compile typemap and examples, run
 ```
-sbt:typemap> compile
+sbt:typemap> build
 ```
 To run the tests
 ```
@@ -44,6 +44,12 @@ sbt:typemap> bench / Jmh / run -rf json .*PlayBench.*
 To run [scalafmt](https://scalameta.org/scalafmt/docs/installation.html):
 ```
 sbt:typemap> fmt
+```
+To run sbt-coverage
+```
+$ ./coverage.sh
+```
+
 ```
 
 ### Usage
