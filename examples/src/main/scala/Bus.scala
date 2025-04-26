@@ -1,6 +1,7 @@
 package examples
 import typemap.{ TypeMap, CMapBackend, typeName, given }
 
+import scala.reflect.ClassTag
 import scala.concurrent.{ Future, Promise, ExecutionContext }
 import java.util.concurrent.ConcurrentHashMap as CMap
 
@@ -21,7 +22,9 @@ object Bus:
 
   inline def publish[T <: Keys](t: T): Unit = map.get[T].foreach(_.foreach(_.apply(t)))
   // extracted from `subscribe` to avoid warning about definition being duplicated at each callsite
-  private def buseableFunctionBuilder[T <: Keys](f: PartialFunction[T, Unit]): PartialFunction[Keys, Unit] = {
+  private def buseableFunctionBuilder[T <: Keys: ClassTag](
+      f: PartialFunction[T, Unit]
+  ): PartialFunction[Keys, Unit] = {
     case x: T =>
       // it's not always error when type T is enum, and matching only one variant
       f.applyOrElse(x, _ => ())
@@ -29,7 +32,7 @@ object Bus:
     case y => println(s"Subscribe error: Incorrect message type, wanted: ${typeName[T]}, received: $y")
   }
 
-  inline def subscribe[T <: Keys](f: PartialFunction[T, Unit]): Unit =
+  inline def subscribe[T <: Keys: ClassTag](f: PartialFunction[T, Unit]): Unit =
     val buseableFunction = buseableFunctionBuilder[T](f)
     // map.computeIfA[T](map.get[T].fold(Set(buseableFunction))(_ + buseableFunction))
     map.compute[T](vOpt => vOpt.fold(Set(buseableFunction))(_ + buseableFunction))

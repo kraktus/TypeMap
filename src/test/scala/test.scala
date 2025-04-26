@@ -94,3 +94,14 @@ class TypeMapTest extends munit.FunSuite:
     assertEquals(map.get[A], Some(3))
     assertEquals(map.get[B], None)
   }
+
+  test("MutableTypeMap make") {
+    val map: MutableTypeMap[Int, CMapBackend] = MutableTypeMap.make(10)
+    map.put[String](1)
+    map.put[Float](2)
+    map.put[A](3)
+    assertEquals(map.get[String], Some(1))
+    assertEquals(map.get[Float], Some(2))
+    assertEquals(map.get[A], Some(3))
+    assertEquals(map.get[B], None)
+  }
