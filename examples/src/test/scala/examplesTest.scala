@@ -49,6 +49,13 @@ class ExamplesTest extends munit.FunSuite:
     MutBus.subscribe[Foo] { case Foo.Bar(i) => fooResult = Some(Foo.Bar(i)) }
     MutBus.publish(a)
     MutBus.publish(b)
+    assertNoDiff(
+      compileErrors(" MutBus.publish(b, \"bb\")"),
+      """error: No given instance of type scala.util.NotGiven[(examples.B, String) <:< Tuple] was found for parameter x$2 of method publish in object MutBus
+ MutBus.publish(b, "bb")
+                       ^""".stripMargin
+    )
+
     MutBus.publish(c)
     MutBus.publish(foo)
     assertEquals(aResult, Some(a))

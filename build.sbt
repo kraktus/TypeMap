@@ -1,5 +1,6 @@
 ThisBuild / version           := "0.1.0-SNAPSHOT"
 ThisBuild / scalaVersion      := "3.6.4"
+ThisBuild / organization  := "org.lichess"
 
 // from scalachess
 val commonSettings = Seq(

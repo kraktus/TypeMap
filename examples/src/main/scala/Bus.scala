@@ -3,6 +3,7 @@ import typemap.{ TypeMap, MutableTypeMap, CMapBackend, typeName, given }
 
 import scala.reflect.ClassTag
 import scala.concurrent.{ Future, Promise, ExecutionContext }
+import scala.util.NotGiven
 
 case class A(i: Int)
 case class B(s: String)
@@ -18,7 +19,7 @@ object Bus:
 
   val map: TypeMap[Keys, Value, CMapBackend] = TypeMap.empty
 
-  inline def publish[T <: Keys](t: T): Unit = map.get[T].foreach(_.foreach(_.apply(t)))
+  inline def publish[T <: Keys](t: T)(using NotGiven[T <:< Tuple]): Unit = map.get[T].foreach(_.foreach(_.apply(t)))
   // extracted from `subscribe` to avoid warning about definition being duplicated at each callsite
   private def buseableFunctionBuilder[T <: Keys: ClassTag](
       f: PartialFunction[T, Unit]
@@ -46,7 +47,7 @@ object MutBus:
   private type Value = Set[PartialFunction[Any, Unit]]
   val map: MutableTypeMap[Value, CMapBackend] = MutableTypeMap.empty
 
-  inline def publish[T](t: T): Unit = map.get[T].foreach(_.foreach(_.apply(t)))
+  inline def publish[T](t: T)(using NotGiven[T <:< Tuple]): Unit = map.get[T].foreach(_.foreach(_.apply(t)))
 
   // extracted from `subscribe` to avoid warning about definition being duplicated at each callsite
   private def buseableFunctionBuilder[T <: Any: ClassTag](
