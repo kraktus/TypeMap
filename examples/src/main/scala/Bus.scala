@@ -1,5 +1,5 @@
 package examples
-import typemap.{ TypeMap, CMapBackend, typeName, given }
+import typemap.{ TypeMap, MutableTypeMap, CMapBackend, typeName, given }
 
 import scala.reflect.ClassTag
 import scala.concurrent.{ Future, Promise, ExecutionContext }
@@ -16,8 +16,7 @@ enum Foo:
 object Bus:
   private type Keys  = A | B | C | D | Foo
   private type Value = Set[PartialFunction[Keys, Unit]]
-  // also possible with a mutable typemap
-  // val map: MutableTypeMap[Value, CMapBackend] = MutableTypeMap.empty
+
   val map: TypeMap[Keys, Value, CMapBackend] = TypeMap.empty
 
   inline def publish[T <: Keys](t: T): Unit = map.get[T].foreach(_.foreach(_.apply(t)))
@@ -34,10 +33,39 @@ object Bus:
 
   inline def subscribe[T <: Keys: ClassTag](f: PartialFunction[T, Unit]): Unit =
     val buseableFunction = buseableFunctionBuilder[T](f)
-    // map.computeIfA[T](map.get[T].fold(Set(buseableFunction))(_ + buseableFunction))
-    map.compute[T](vOpt => vOpt.fold(Set(buseableFunction))(_ + buseableFunction))
+    map.compute[T](_.fold(Set(buseableFunction))(_ + buseableFunction))
 
   inline def ask[A, T <: Keys](makeMsg: Promise[A] => T)(using
+      ExecutionContext
+  ): Future[A] =
+    val promise = Promise[A]()
+    val msg     = makeMsg(promise)
+    publish(msg)
+    promise.future
+
+
+object MutBus:
+  private type Value = Set[PartialFunction[Any, Unit]]
+  val map: MutableTypeMap[Value, CMapBackend] = MutableTypeMap.empty
+
+  inline def publish[T](t: T): Unit = map.get[T].foreach(_.foreach(_.apply(t)))
+
+  // extracted from `subscribe` to avoid warning about definition being duplicated at each callsite
+  private def buseableFunctionBuilder[T <: Any: ClassTag](
+      f: PartialFunction[T, Unit]
+  ): PartialFunction[Any, Unit] = {
+    case x: T =>
+      // it's not always error when type T is enum, and matching only one variant
+      f.applyOrElse(x, _ => ())
+    // error because events are based by types
+    case y => println(s"Subscribe error: Incorrect message type, wanted: ${typeName[T]}, received: $y")
+  }
+
+  inline def subscribe[T <: Any: ClassTag](f: PartialFunction[T, Unit]): Unit =
+    val buseableFunction = buseableFunctionBuilder[T](f)
+    map.compute[T](_.fold(Set(buseableFunction))(_ + buseableFunction))
+
+  inline def ask[A, T](makeMsg: Promise[A] => T)(using
       ExecutionContext
   ): Future[A] =
     val promise = Promise[A]()

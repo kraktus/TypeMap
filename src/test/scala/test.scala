@@ -70,8 +70,9 @@ class TypeMapTest extends munit.FunSuite:
                   ^""".stripMargin
     )
   }
-  test("TypeMap, CMapBackend") {
-    val map: TypeMap[Int | String, String, CMapBackend] = TypeMap.empty
+
+  private def typeMapTest[Backend[_]](using ops: MapOps[Backend, String]) = {
+    val map: TypeMap[Int | String, String, Backend] = TypeMap.empty
     map.put[Int]("1")
     assertEquals(map.get[Int], Some("1"))
     assertEquals(map.get[String], None)
@@ -82,6 +83,15 @@ class TypeMapTest extends munit.FunSuite:
       compileErrors("map.get[Float]"),
                   ^""".stripMargin
     )
+  }
+  test("TypeMap, CMapBackend") {
+    typeMapTest[CMapBackend]
+  }
+  test("TypeMap, ArraySeqBackend") {
+    typeMapTest[ArraySeqBackend]
+  }
+  test("TypeMap, CowArrayBackend") {
+    typeMapTest[CowArrayBackend]
   }
 
   test("MutableTypeMap") {

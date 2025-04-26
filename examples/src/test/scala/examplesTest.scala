@@ -32,3 +32,31 @@ class ExamplesTest extends munit.FunSuite:
     assertEquals(fooResult, Some(foo))
     Bus.ask[Int, D](D(6, _)).foreach { x => assertEquals(x, 48) }
   }
+
+  test("MutBus") {
+    val a                      = A(1)
+    var aResult: Option[A]     = None
+    val b                      = B("This is a B")
+    var bResult: Option[B]     = None
+    val c                      = C(3, "4", 5.0f)
+    var cResult: Option[C]     = None
+    val foo                    = Foo.Baz("baz")
+    var fooResult: Option[Foo] = None
+    MutBus.subscribe[A] { case x: A => aResult = Some(x) }
+    MutBus.subscribe[B] { case y: B => bResult = Some(b) }
+    MutBus.subscribe[C] { case C(i, s, f) => cResult = Some(C(i, s, f)) }
+    MutBus.subscribe[D] { case D(init, p) => p.completeWith(Future.successful(init + 42)) }
+    MutBus.subscribe[Foo] { case Foo.Bar(i) => fooResult = Some(Foo.Bar(i)) }
+    MutBus.publish(a)
+    MutBus.publish(b)
+    MutBus.publish(c)
+    MutBus.publish(foo)
+    assertEquals(aResult, Some(a))
+    assertEquals(bResult, Some(b))
+    assertEquals(cResult, Some(c))
+    assertEquals(fooResult, None)
+    MutBus.subscribe[Foo] { case Foo.Baz(s) => fooResult = Some(Foo.Baz(s)) }
+    MutBus.publish(foo)
+    assertEquals(fooResult, Some(foo))
+    MutBus.ask[Int, D](D(6, _)).foreach { x => assertEquals(x, 48) }
+  }
