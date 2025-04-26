@@ -20,14 +20,17 @@ object Bus:
   val map: TypeMap[Keys, Value, CMapBackend] = TypeMap.empty
 
   inline def publish[T <: Keys](t: T): Unit = map.get[T].foreach(_.foreach(_.apply(t)))
+  // extracted from `subscribe` to avoid warning about definition being duplicated at each callsite
+  private def buseableFunctionBuilder[T <: Keys](f: PartialFunction[T, Unit]): PartialFunction[Keys, Unit] = {
+    case x: T =>
+      // it's not always error when type T is enum, and matching only one variant
+      f.applyOrElse(x, _ => ())
+    // error because events are based by types
+    case y => println(s"Subscribe error: Incorrect message type, wanted: ${typeName[T]}, received: $y")
+  }
+
   inline def subscribe[T <: Keys](f: PartialFunction[T, Unit]): Unit =
-    val buseableFunction: PartialFunction[Keys, Unit] = {
-      case x: T =>
-        // it's not always error when type T is enum, and matching only one variant
-        f.applyOrElse(x, _ => ())
-      // error because events are based by types
-      case y => println(s"Subscribe error: Incorrect message type, wanted: ${typeName[T]}, received: $y")
-    }
+    val buseableFunction = buseableFunctionBuilder[T](f)
     // map.computeIfA[T](map.get[T].fold(Set(buseableFunction))(_ + buseableFunction))
     map.compute[T](vOpt => vOpt.fold(Set(buseableFunction))(_ + buseableFunction))
 

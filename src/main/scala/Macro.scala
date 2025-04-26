@@ -31,3 +31,34 @@ def isInTupleImpl[X: Type, T <: Tuple: Type](using Quotes): Expr[Boolean] =
     case AppliedType(_, tpes) => tpes
     case _                    => Nil
   Expr(tTypes.exists(_ =:= xType))
+
+object MacroTest:
+  inline def printFieldsAndTypes[T]: Unit = ${ printFieldsAndTypesImpl[T] }
+
+  def printFieldsAndTypesImpl[T: Type](using Quotes): Expr[Unit] =
+    import quotes.reflect.*
+
+    // Get the type symbol of T
+    val tpe    = TypeRepr.of[T]
+    val symbol = tpe.typeSymbol
+
+    // Ensure that T is a class
+    if !symbol.isClassDef then
+      report.error("Expected a class type")
+      return '{ () }
+
+    // Get all fields of the class
+    val fields = symbol.primaryConstructor.paramSymss.flatten.map { param =>
+      val name = param.name
+      val fieldType = param.tree match
+        case v: ValDef => v.tpt.tpe.show
+        case _         => "unknown"
+      (name, fieldType)
+    }
+
+    // Print the fields and their types
+    fields.foreach { case (name, fieldType) =>
+      println(s"Field: $name, Type: $fieldType")
+    }
+
+    '{ () }

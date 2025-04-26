@@ -35,3 +35,4 @@ metals.sbt
 # jmh
 # bench/jmh-result.json
 jmh-result.json
+.aider*
