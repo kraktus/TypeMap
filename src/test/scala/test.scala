@@ -71,7 +71,7 @@ class TypeMapTest extends munit.FunSuite:
     )
   }
 
-  private def typeMapTest[Backend[_]](using ops: MapOps[Backend, String]) = {
+  private def typeMapTest[Backend[_]](using ops: MapOps[Backend, String]) =
     val map: TypeMap[Int | String, String, Backend] = TypeMap.empty
     map.put[Int]("1")
     assertEquals(map.get[Int], Some("1"))
@@ -83,15 +83,19 @@ class TypeMapTest extends munit.FunSuite:
       compileErrors("map.get[Float]"),
                   ^""".stripMargin
     )
-  }
+    map
+
   test("TypeMap, CMapBackend") {
-    typeMapTest[CMapBackend]
+    val map = typeMapTest[CMapBackend]
+    assertEquals(map.unsafeMap.get(int), "1")
   }
   test("TypeMap, ArraySeqBackend") {
-    typeMapTest[ArraySeqBackend]
+    val map = typeMapTest[ArraySeqBackend]
+    assertEquals(map.unsafeMap.indexOf(Some("1")), 0)
   }
   test("TypeMap, CowArrayBackend") {
-    typeMapTest[CowArrayBackend]
+    val map = typeMapTest[CowArrayBackend]
+    assertEquals(map.unsafeMap.get(0), Some("1"))
   }
 
   test("MutableTypeMap") {
@@ -103,6 +107,12 @@ class TypeMapTest extends munit.FunSuite:
     assertEquals(map.get[Float], Some(2))
     assertEquals(map.get[A], Some(3))
     assertEquals(map.get[B], None)
+    assertEquals(map.unsafeMap.get(float), 2)
+    map.computeIfPresent[String](_ + 1)
+    assertEquals(map.get[String], Some(2))
+    map.computeIfAbsent[IntOpaque](15)
+    assertEquals(map.get[IntOpaque], Some(15))
+    // assertEquals(map.unsafeMap.get("zoo"), null.asInstanceOf[Int])
   }
 
   test("MutableTypeMap make") {

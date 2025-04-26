@@ -45,7 +45,7 @@ def opImpl[T: Type, K: Type, V: Type, Result: Type](res: Expr[(Int, String) => R
 
 object TypeMap:
   inline def empty[K, V, F[_]](using ops: MapOps[F, V]): TypeMap[K, V, F] = ${ emptyImpl[K, V, F]('ops) }
-  def emptyImpl[K: Type, V: Type, F[_]: Type](opsE: Expr[MapOps[F, V]])(using
+  private def emptyImpl[K: Type, V: Type, F[_]: Type](opsE: Expr[MapOps[F, V]])(using
       Quotes
   ): Expr[TypeMap[K, V, F]] =
     '{ TypeMap[K, V, F](${ opsE }.make(${ unionLengthImpl[K] }))(using ${ opsE }) }

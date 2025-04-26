@@ -3,7 +3,6 @@ import typemap.{ TypeMap, MutableTypeMap, CMapBackend, typeName, given }
 
 import scala.reflect.ClassTag
 import scala.concurrent.{ Future, Promise, ExecutionContext }
-import java.util.concurrent.ConcurrentHashMap as CMap
 
 case class A(i: Int)
 case class B(s: String)
@@ -42,7 +41,6 @@ object Bus:
     val msg     = makeMsg(promise)
     publish(msg)
     promise.future
-
 
 object MutBus:
   private type Value = Set[PartialFunction[Any, Unit]]
