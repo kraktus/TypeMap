@@ -50,7 +50,7 @@ class MutableTypeMap[V, F[_]](private val map: F[V])(using ops: MutableMapOps[F,
 def mutableOpImpl[T: Type, V: Type, Result: Type](res: Expr[String => Result])(using
     Quotes
 ): Expr[Result] =
-  '{ ${ res }(${ typeNameImpl[T] }) }
+  '{ ${ res }(${ safeTypeNameImpl[T] }) }
 
 object MutableTypeMap:
 

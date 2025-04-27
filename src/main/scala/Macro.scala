@@ -8,6 +8,14 @@ inline def typeName[A]: String = ${ typeNameImpl[A] }
 def typeNameImpl[A: Type](using Quotes): Expr[String] =
   Expr(quotes.reflect.TypeRepr.of[A].dealiasKeepOpaques.show)
 
+def safeTypeNameImpl[A: Type](using Quotes): Expr[String] =
+  import quotes.reflect.*
+  val tpe = quotes.reflect.TypeRepr.of[A].dealiasKeepOpaques
+  println(s"${tpe.show} final flags ${tpe.typeSymbol.flags.is(Flags.Final)}")
+  if !(tpe.typeSymbol.flags.is(Flags.Final) || tpe.typeSymbol.flags.is(Flags.Enum)) then
+    report.errorAndAbort(s"The type ${tpe.show} should be final or enum")
+  Expr(tpe.show)
+
 inline def typeNamesTuple[T <: Tuple]: List[String] =
   inline erasedValue[T] match
     case _: EmptyTuple => Nil

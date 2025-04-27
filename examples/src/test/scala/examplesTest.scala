@@ -42,11 +42,16 @@ class ExamplesTest extends munit.FunSuite:
     var cResult: Option[C]     = None
     val foo                    = Foo.Baz("baz")
     var fooResult: Option[Foo] = None
+
+    val e                  = E("zombo")
+    var eResult: Option[E] = None
+
     MutBus.subscribe[A] { case x: A => aResult = Some(x) }
     MutBus.subscribe[B] { case y: B => bResult = Some(b) }
     MutBus.subscribe[C] { case C(i, s, f) => cResult = Some(C(i, s, f)) }
     MutBus.subscribe[D] { case D(init, p) => p.completeWith(Future.successful(init + 42)) }
     MutBus.subscribe[Foo] { case Foo.Bar(i) => fooResult = Some(Foo.Bar(i)) }
+
     MutBus.publish(a)
     MutBus.publish(b)
     assertNoDiff(
@@ -66,4 +71,19 @@ class ExamplesTest extends munit.FunSuite:
     MutBus.publish(foo)
     assertEquals(fooResult, Some(foo))
     MutBus.ask[Int, D](D(6, _)).foreach { x => assertEquals(x, 48) }
+
+    assertNoDiff(
+      compileErrors(
+        "MutBus.subscribe:\n" +
+          "case e: E       => eResult = Some(e)\n" +
+          "case A(i)       => eResult = None\n" +
+          "case B(_)       => eResult = None\n" +
+          "case C(_, _, _) => eResult = None\n" +
+          "case D(_, _)    => eResult = None"
+      ),
+      """error: indented definitions expected, case found
+case e: E       => eResult = Some(e)
+^""".stripMargin
+    )
+
   }

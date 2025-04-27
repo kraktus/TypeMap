@@ -2,16 +2,17 @@ import typemap.{ *, given }
 
 // For more information on writing tests, see
 // https://scalameta.org/munit/docs/getting-started.html
-opaque type IntOpaque = Int
-type Alias            = (Int, String, Float)
-type Union            = String | Int | Float
-type UnionDup         = String | Int | Float | Int
+final opaque type IntOpaque = Int
+type Alias                  = (Int, String, Float)
+type Union                  = String | Int | Float
+type UnionDup               = String | Int | Float | Int
+
 case class OutsidePackage(i: Int);
 package inside:
   case class InsidePackage(x: String)
 
-case class A(i: Int)
-case class B(s: String)
+final case class A(i: Int)
+final case class B(s: String)
 
 class TypeMapTest extends munit.FunSuite:
   test("isInTuple") {
