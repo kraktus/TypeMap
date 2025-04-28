@@ -68,6 +68,12 @@ object MutBus:
     val buseableFunction = buseableFunctionBuilder[T](f)
     map.compute[T](_.fold(Set(buseableFunction))(_ + buseableFunction))
 
+  inline def subscribe[T <: Any: ClassTag](f: T => Unit): Unit =
+    assertBuseable[T]
+    val partialF: PartialFunction[T, Unit] = { case x => f(x) } 
+    val buseableFunction = buseableFunctionBuilder[T](partialF)
+    map.compute[T](_.fold(Set(buseableFunction))(_ + buseableFunction))
+
   inline def ask[A, T](makeMsg: Promise[A] => T)(using
       ExecutionContext
   ): Future[A] =

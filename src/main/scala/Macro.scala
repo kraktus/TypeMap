@@ -18,7 +18,6 @@ def assertBuseableImpl[A: Type](using Quotes) =
   // internally tuples are represented as case class, so need to be filtered out manually
   val isTuple     = tpe <:< TypeRepr.of[Tuple]
   val isCaseClass = (!isTuple && tpe.typeSymbol.isClassDef && flags.is(Flags.Case))
-  println(s"type ${tpe.show} enum $isEnum, case class $isCaseClass")
   if !(isEnum || isCaseClass) then report.errorAndAbort(s"The type ${tpe.show} should be case class, or enum")
   '{}
 
