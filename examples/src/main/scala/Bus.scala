@@ -1,15 +1,15 @@
 package examples
-import typemap.{ TypeMap, MutableTypeMap, CMapBackend, typeName, given }
+import typemap.{ TypeMap, MutableTypeMap, CMapBackend, assertBuseable, typeName, given }
 
 import scala.reflect.ClassTag
 import scala.concurrent.{ Future, Promise, ExecutionContext }
 import scala.util.NotGiven
 
-final case class A(i: Int)
-final case class B(s: String)
-final case class C(i: Int, s: String, f: Float)
-final case class D(init: Int, p: Promise[Int])
-final case class E(zombo: String)
+case class A(i: Int)
+case class B(s: String)
+case class C(i: Int, s: String, f: Float)
+case class D(init: Int, p: Promise[Int])
+case class E(zombo: String)
 enum Foo:
   case Bar(i: Int)
   case Baz(s: String)
@@ -34,6 +34,7 @@ object Bus:
   }
 
   inline def subscribe[T <: Keys: ClassTag](f: PartialFunction[T, Unit]): Unit =
+    assertBuseable[T]
     val buseableFunction = buseableFunctionBuilder[T](f)
     map.compute[T](_.fold(Set(buseableFunction))(_ + buseableFunction))
 
@@ -63,7 +64,7 @@ object MutBus:
   }
 
   inline def subscribe[T <: Any: ClassTag](f: PartialFunction[T, Unit]): Unit =
-    println(s"subscribe: ${typeName[T]}")
+    assertBuseable[T]
     val buseableFunction = buseableFunctionBuilder[T](f)
     map.compute[T](_.fold(Set(buseableFunction))(_ + buseableFunction))
 

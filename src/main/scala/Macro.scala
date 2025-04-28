@@ -8,13 +8,19 @@ inline def typeName[A]: String = ${ typeNameImpl[A] }
 def typeNameImpl[A: Type](using Quotes): Expr[String] =
   Expr(quotes.reflect.TypeRepr.of[A].dealiasKeepOpaques.show)
 
-def safeTypeNameImpl[A: Type](using Quotes): Expr[String] =
+inline def assertBuseable[A] = ${ assertBuseableImpl[A] }
+
+def assertBuseableImpl[A: Type](using Quotes) =
   import quotes.reflect.*
-  val tpe = quotes.reflect.TypeRepr.of[A].dealiasKeepOpaques
-  println(s"${tpe.show} final flags ${tpe.typeSymbol.flags.is(Flags.Final)}")
-  if !(tpe.typeSymbol.flags.is(Flags.Final) || tpe.typeSymbol.flags.is(Flags.Enum)) then
-    report.errorAndAbort(s"The type ${tpe.show} should be final or enum")
-  Expr(tpe.show)
+  val tpe    = quotes.reflect.TypeRepr.of[A].dealiasKeepOpaques
+  val flags  = tpe.typeSymbol.flags
+  val isEnum = flags.is(Flags.Enum)
+  // internally tuples are represented as case class, so need to be filtered out manually
+  val isTuple     = tpe <:< TypeRepr.of[Tuple]
+  val isCaseClass = (!isTuple && tpe.typeSymbol.isClassDef && flags.is(Flags.Case))
+  println(s"type ${tpe.show} enum $isEnum, case class $isCaseClass")
+  if !(isEnum || isCaseClass) then report.errorAndAbort(s"The type ${tpe.show} should be case class, or enum")
+  '{}
 
 inline def typeNamesTuple[T <: Tuple]: List[String] =
   inline erasedValue[T] match

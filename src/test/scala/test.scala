@@ -2,17 +2,17 @@ import typemap.{ *, given }
 
 // For more information on writing tests, see
 // https://scalameta.org/munit/docs/getting-started.html
-final opaque type IntOpaque = Int
-type Alias                  = (Int, String, Float)
-type Union                  = String | Int | Float
-type UnionDup               = String | Int | Float | Int
+opaque type IntOpaque = Int
+type Alias            = (Int, String, Float)
+type Union            = String | Int | Float
+type UnionDup         = String | Int | Float | Int
 
 case class OutsidePackage(i: Int);
 package inside:
   case class InsidePackage(x: String)
 
-final case class A(i: Int)
-final case class B(s: String)
+case class A(i: Int)
+case class B(s: String)
 
 class TypeMapTest extends munit.FunSuite:
   test("isInTuple") {
@@ -68,6 +68,29 @@ class TypeMapTest extends munit.FunSuite:
       compileErrors("isUnionCanonical[UnionDup]"),
       """error: Type scala.Int found multiple times (CHECK ALIASES) in union scala.Predef.String | scala.Int | scala.Float | scala.Int
       compileErrors("isUnionCanonical[UnionDup]"),
+                  ^""".stripMargin
+    )
+  }
+
+  test("assertBuseable") {
+    assertBuseable[A]
+    assertBuseable[inside.InsidePackage]
+    assertNoDiff(
+      compileErrors("assertBuseable[IntOpaque]"),
+      """error: The type test$package.IntOpaque should be case class, or enum
+      compileErrors("assertBuseable[IntOpaque]"),
+                  ^""".stripMargin
+    )
+    assertNoDiff(
+      compileErrors("assertBuseable[Alias]"),
+      """error: The type scala.Tuple3[scala.Int, scala.Predef.String, scala.Float] should be case class, or enum
+      compileErrors("assertBuseable[Alias]"),
+                  ^""".stripMargin
+    )
+    assertNoDiff(
+      compileErrors("assertBuseable[Union]"),
+      """error: The type scala.Predef.String | scala.Int | scala.Float should be case class, or enum
+      compileErrors("assertBuseable[Union]"),
                   ^""".stripMargin
     )
   }
