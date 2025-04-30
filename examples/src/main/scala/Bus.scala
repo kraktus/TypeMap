@@ -10,6 +10,7 @@ case class B(s: String)
 case class C(i: Int, s: String, f: Float)
 case class D(init: Int, p: Promise[Int])
 case class E(zombo: String)
+case class Impossible(x: String) extends NotBuseable
 enum Foo:
   case Bar(i: Int)
   case Baz(s: String)
@@ -46,11 +47,14 @@ object Bus:
     publish(msg)
     promise.future
 
+trait NotBuseable
+
 object MutBus:
   private type Value = Set[PartialFunction[Any, Unit]]
   val map: MutableTypeMap[Value, CMapBackend] = MutableTypeMap.empty
 
-  inline def publish[T](t: T)(using NotGiven[T <:< Tuple]): Unit = map.get[T].foreach(_.foreach(_.apply(t)))
+  inline def publish[T](t: T)(using NotGiven[T <:< Tuple], NotGiven[T <:< NotBuseable]): Unit =
+    map.get[T].foreach(_.foreach(_.apply(t)))
 
   // extracted from `subscribe` to avoid warning about definition being duplicated at each callsite
   private def buseableFunctionBuilder[T <: Any: ClassTag](
@@ -66,12 +70,6 @@ object MutBus:
   inline def subscribe[T <: Any: ClassTag](f: PartialFunction[T, Unit]): Unit =
     assertBuseable[T]
     val buseableFunction = buseableFunctionBuilder[T](f)
-    map.compute[T](_.fold(Set(buseableFunction))(_ + buseableFunction))
-
-  inline def subscribe[T <: Any: ClassTag](f: T => Unit): Unit =
-    assertBuseable[T]
-    val partialF: PartialFunction[T, Unit] = { case x => f(x) } 
-    val buseableFunction = buseableFunctionBuilder[T](partialF)
     map.compute[T](_.fold(Set(buseableFunction))(_ + buseableFunction))
 
   inline def ask[A, T](makeMsg: Promise[A] => T)(using

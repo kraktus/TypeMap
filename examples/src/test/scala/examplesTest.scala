@@ -86,4 +86,11 @@ case e: E       => eResult = Some(e)
 ^""".stripMargin
     )
 
+    assertNoDiff(
+      compileErrors("MutBus.publish(Impossible(\"not buseable!!\"))"),
+      """error: No given instance of type scala.util.NotGiven[examples.Impossible <:< examples.NotBuseable] was found for parameter x$3 of method publish in object MutBus
+MutBus.publish(Impossible("not buseable!!"))
+                                           ^""".stripMargin
+    )
+
   }
