@@ -1,7 +1,7 @@
 package examples
 import typemap.{ TypeMap, MutableTypeMap, CMapBackend, assertBuseable, typeName, given }
 
-import scala.reflect.ClassTag
+import scala.reflect.Typeable
 import scala.concurrent.{ Future, Promise, ExecutionContext }
 import scala.util.NotGiven
 
@@ -24,7 +24,7 @@ object Bus:
   inline def publish[T <: Keys](t: T)(using NotGiven[T <:< Tuple]): Unit =
     map.get[T].foreach(_.foreach(_.apply(t)))
   // extracted from `subscribe` to avoid warning about definition being duplicated at each callsite
-  private def buseableFunctionBuilder[T <: Keys: ClassTag](
+  private def buseableFunctionBuilder[T <: Keys: Typeable](
       f: PartialFunction[T, Unit]
   ): PartialFunction[Keys, Unit] = {
     case x: T =>
@@ -34,7 +34,7 @@ object Bus:
     case y => println(s"Subscribe error: Incorrect message type, wanted: ${typeName[T]}, received: $y")
   }
 
-  inline def subscribe[T <: Keys: ClassTag](f: PartialFunction[T, Unit]): Unit =
+  inline def subscribe[T <: Keys: Typeable](f: PartialFunction[T, Unit]): Unit =
     assertBuseable[T]
     val buseableFunction = buseableFunctionBuilder[T](f)
     map.compute[T](v => Some(v.fold(Set(buseableFunction))(_ + buseableFunction)))
@@ -57,7 +57,7 @@ object MutBus:
     map.get[T].foreach(_.foreach(_.apply(t)))
 
   // extracted from `subscribe` to avoid warning about definition being duplicated at each callsite
-  private def buseableFunctionBuilder[T <: Any: ClassTag](
+  private def buseableFunctionBuilder[T <: Any: Typeable](
       f: PartialFunction[T, Unit]
   ): PartialFunction[Any, Unit] = {
     case x: T =>
@@ -67,7 +67,7 @@ object MutBus:
     case y => println(s"Subscribe error: Incorrect message type, wanted: ${typeName[T]}, received: $y")
   }
 
-  inline def subscribe[T <: Any: ClassTag](f: PartialFunction[T, Unit]): Unit =
+  inline def subscribe[T <: Any: Typeable](f: PartialFunction[T, Unit]): Unit =
     assertBuseable[T]
     val buseableFunction = buseableFunctionBuilder[T](f)
     map.compute[T](v => Some(v.fold(Set(buseableFunction))(_ + buseableFunction)))

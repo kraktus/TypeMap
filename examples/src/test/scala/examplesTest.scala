@@ -43,7 +43,7 @@ class ExamplesTest extends munit.FunSuite:
     val foo                    = Foo.Baz("baz")
     var fooResult: Option[Foo] = None
 
-    val e                  = E("zombo")
+    // val e                  = E("zombo")
     var eResult: Option[E] = None
 
     MutBus.subscribe[A] { case x: A => aResult = Some(x) }
@@ -74,14 +74,14 @@ class ExamplesTest extends munit.FunSuite:
 
     assertNoDiff(
       compileErrors(
-        "MutBus.publish:\n" +
+        "MutBus.subscribe:\n" +
           "  case e: E       => eResult = Some(e)\n" +
           "  case A(i)       => eResult = None\n" +
           "  case B(_)       => eResult = None\n" +
           "  case C(_, _, _) => eResult = None\n" +
           "  case D(_, _)    => eResult = None"
       ),
-      """error: The type scala.Matchable should be case class, or enum
+      """error: The type scala.Any should be case class, or enum
       compileErrors(
                   ^""".stripMargin
     )
