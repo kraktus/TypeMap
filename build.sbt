@@ -1,19 +1,26 @@
-ThisBuild / version           := "0.1.0-SNAPSHOT"
-ThisBuild / scalaVersion      := "3.6.4"
-ThisBuild / organization  := "org.lichess"
+inThisBuild(
+  Seq(
+    scalaVersion  := "3.6.4",
+    versionScheme := Some("early-semver"),
+    version       := "0.1.0-SNAPSHOT",
+    organization  := "org.lichess",
+    licenses += ("MIT" -> url("https://opensource.org/licenses/MIT")),
+    publishTo     := Option(Resolver.file("file", new File(sys.props.getOrElse("publishTo", ""))))
+  )
+)
 
 // from scalachess
 val commonSettings = Seq(
   scalacOptions := Seq(
     "-encoding",
     "utf-8",
-    // "-source:future-migration",
+    "-source:future-migration",
     "-indent",
     "-feature",
     // "-language:postfixOps",
     "-Wunused:all",
     "-release:21"
-    // "-Werror"
+    //"-Werror"
     // Warnings as errors!
     /* "-Xfatal-warnings" */
   )
