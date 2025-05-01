@@ -8,6 +8,28 @@ inline def typeName[A]: String = ${ typeNameImpl[A] }
 def typeNameImpl[A: Type](using Quotes): Expr[String] =
   Expr(quotes.reflect.TypeRepr.of[A].dealiasKeepOpaques.show)
 
+/** Error at compile-time if the type is not a case class or enum. This is useful when typemap is used to
+  * create a type-safe Bus, such as in scalalib To forbid the following error from happening
+  * ```scala3
+  * Bus.sub: // compilers implicitely fallback to `Matchable`
+  *  case A(i)       => prinln!("triggered!")
+  *  case B(_)       => prinln!("triggered!")
+  *
+  *  Bus.pub[A](A(0))
+  *  Bus.pub[B](B("str"))
+  *  ...
+  *  // `"triggered!"` is never printed because the types do not sync
+  *  // the subcriber is listening on `Matchable`, while the publisher
+  *  // use a subtype, such as `A` or `B`.
+  *
+  *  // The correct way to do is
+  *  Bus.sub: // uses `A`, even better to explicitely cast it
+  *    case A(i)       => prinln!("triggered!")
+  *  Bus.sub: // uses `B`, even better to explicitely cast it
+  *    case B(_)       => prinln!("triggered!")
+  * ```
+  * `assertBuseable` is used in `sub` to make sure the mistake errors at compile-time
+  */
 inline def assertBuseable[A] = ${ assertBuseableImpl[A] }
 
 def assertBuseableImpl[A: Type](using Quotes) =

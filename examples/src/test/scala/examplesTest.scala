@@ -74,16 +74,16 @@ class ExamplesTest extends munit.FunSuite:
 
     assertNoDiff(
       compileErrors(
-        "MutBus.subscribe:\n" +
-          "case e: E       => eResult = Some(e)\n" +
-          "case A(i)       => eResult = None\n" +
-          "case B(_)       => eResult = None\n" +
-          "case C(_, _, _) => eResult = None\n" +
-          "case D(_, _)    => eResult = None"
+        "MutBus.publish:\n" +
+          "  case e: E       => eResult = Some(e)\n" +
+          "  case A(i)       => eResult = None\n" +
+          "  case B(_)       => eResult = None\n" +
+          "  case C(_, _, _) => eResult = None\n" +
+          "  case D(_, _)    => eResult = None"
       ),
-      """error: indented definitions expected, case found
-case e: E       => eResult = Some(e)
-^""".stripMargin
+      """error: The type scala.Matchable should be case class, or enum
+      compileErrors(
+                  ^""".stripMargin
     )
 
     assertNoDiff(
