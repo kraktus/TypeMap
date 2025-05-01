@@ -18,21 +18,19 @@ trait ThreadSafeMutableMapOps[F[_], V]:
   def compute(ds: F[V], key: String, f: Option[V] => Option[V]): Option[V]
 
 // implement `ThreadSafeMutableMapOps` for all types implementing `ThreadSafeMapOps`
-given [F[_], V] => (mutOps: ThreadSafeMutableMapOps[F, V]) => ThreadSafeMapOps[F, V] =
-  new:
-    def computeIfAbsent(ds: F[V], index: Int, key: String, f: => Option[V]): Option[V] =
-      mutOps.computeIfAbsent(ds, key, f)
-    def computeIfPresent(ds: F[V], index: Int, key: String, f: V => Option[V]): Option[V] =
-      mutOps.computeIfPresent(ds, key, f)
-    def compute(ds: F[V], index: Int, key: String, f: Option[V] => Option[V]): Option[V] =
-      mutOps.compute(ds, key, f)
+given [F[_], V] => (mutOps: ThreadSafeMutableMapOps[F, V]) => ThreadSafeMapOps[F, V]:
+  def computeIfAbsent(ds: F[V], index: Int, key: String, f: => Option[V]): Option[V] =
+    mutOps.computeIfAbsent(ds, key, f)
+  def computeIfPresent(ds: F[V], index: Int, key: String, f: V => Option[V]): Option[V] =
+    mutOps.computeIfPresent(ds, key, f)
+  def compute(ds: F[V], index: Int, key: String, f: Option[V] => Option[V]): Option[V] =
+    mutOps.compute(ds, key, f)
 
 // implement `MapOps` for all types implementing `MutableMapOps`
-given [F[_], V] => (mutOps: MutableMapOps[F, V]) => MapOps[F, V] =
-  new:
-    def make(length: Int): F[V]                                = mutOps.make(length)
-    def get(ds: F[V], index: Int, key: String): Option[V]      = mutOps.get(ds, key)
-    def put(ds: F[V], index: Int, key: String, value: V): Unit = mutOps.put(ds, key, value)
+given [F[_], V] => (mutOps: MutableMapOps[F, V]) => MapOps[F, V]:
+  def make(length: Int): F[V]                                = mutOps.make(length)
+  def get(ds: F[V], index: Int, key: String): Option[V]      = mutOps.get(ds, key)
+  def put(ds: F[V], index: Int, key: String, value: V): Unit = mutOps.put(ds, key, value)
 
 class MutableTypeMap[V, F[_]](private val map: F[V])(using ops: MutableMapOps[F, V]):
 
