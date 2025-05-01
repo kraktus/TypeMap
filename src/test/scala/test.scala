@@ -132,9 +132,9 @@ class TypeMapTest extends munit.FunSuite:
     assertEquals(map.get[A], Some(3))
     assertEquals(map.get[B], None)
     assertEquals(map.unsafeMap.get(float), 2)
-    map.computeIfPresent[String](_ + 1)
+    map.computeIfPresent[String](x => Some(x + 1))
     assertEquals(map.get[String], Some(2))
-    map.computeIfAbsent[IntOpaque](15)
+    map.computeIfAbsent[IntOpaque](Some(15))
     assertEquals(map.get[IntOpaque], Some(15))
     // assertEquals(map.unsafeMap.get("zoo"), null.asInstanceOf[Int])
   }

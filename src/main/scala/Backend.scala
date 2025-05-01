@@ -13,11 +13,15 @@ given [V]: MutableMapOps[CMapBackend, V] with
 
 given [V]: ThreadSafeMutableMapOps[CMapBackend, V] with
   private type DS = CMapBackend[V]
-  def computeIfAbsent(ds: DS, key: String, f: => V): V = ds.computeIfAbsent(key, _ => f)
-  def computeIfPresent(ds: DS, key: String, f: V => V): Option[V] =
-    Option(ds.computeIfPresent(key, (k, v) => f(v)))
-  def compute(ds: DS, key: String, f: Option[V] => V): V =
-    ds.compute(key, (k, v) => f(Option(v)))
+  def computeIfAbsent(ds: DS, key: String, f: => Option[V]): Option[V] =
+    Option:
+      ds.computeIfAbsent(key, _ => f.getOrElse(null.asInstanceOf[V]))
+  def computeIfPresent(ds: DS, key: String, f: V => Option[V]): Option[V] =
+    Option:
+      ds.computeIfPresent(key, (k, v) => f(v).getOrElse(null.asInstanceOf[V]))
+  def compute(ds: DS, key: String, f: Option[V] => Option[V]): Option[V] =
+    Option:
+      ds.compute(key, (k, v) => f(Option(v)).getOrElse(null.asInstanceOf[V]))
 
 type ArraySeqBackend = [X] =>> ArraySeq[Option[X]]
 given [V]: MapOps[ArraySeqBackend, V] with

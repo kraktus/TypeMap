@@ -14,9 +14,9 @@ trait MapOps[F[_], V]:
   def put(ds: F[V], index: Int, key: String, value: V): Unit
 
 trait ThreadSafeMapOps[F[_], V]:
-  def computeIfAbsent(ds: F[V], index: Int, key: String, f: => V): V
-  def computeIfPresent(ds: F[V], index: Int, key: String, f: V => V): Option[V]
-  def compute(ds: F[V], index: Int, key: String, f: Option[V] => V): V
+  def computeIfAbsent(ds: F[V], index: Int, key: String, f: => Option[V]): Option[V]
+  def computeIfPresent(ds: F[V], index: Int, key: String, f: V => Option[V]): Option[V]
+  def compute(ds: F[V], index: Int, key: String, f: Option[V] => Option[V]): Option[V]
 
 // associate a value of type V to each type in the tuple K
 // TODO use PHF
@@ -24,14 +24,14 @@ class TypeMap[K, V, F[_]](private val map: F[V])(using ops: MapOps[F, V]):
 
   inline def get[T]: Option[V]      = ${ opImpl[T, K, V, Option[V]]('{ ops.get(map, _, _) }) }
   inline def put[T](value: V): Unit = ${ opImpl[T, K, V, Unit]('{ ops.put(map, _, _, value) }) }
-  inline def computeIfAbsent[T](f: => V)(using tsOps: ThreadSafeMapOps[F, V]): V = ${
-    opImpl[T, K, V, V]('{ tsOps.computeIfAbsent(map, _, _, f) })
+  inline def computeIfAbsent[T](f: => Option[V])(using tsOps: ThreadSafeMapOps[F, V]): Option[V] = ${
+    opImpl[T, K, V, Option[V]]('{ tsOps.computeIfAbsent(map, _, _, f) })
   }
-  inline def computeIfPresent[T](f: V => V)(using tsOps: ThreadSafeMapOps[F, V]): Option[V] = ${
+  inline def computeIfPresent[T](f: V => Option[V])(using tsOps: ThreadSafeMapOps[F, V]): Option[V] = ${
     opImpl[T, K, V, Option[V]]('{ tsOps.computeIfPresent(map, _, _, f) })
   }
-  inline def compute[T](f: Option[V] => V)(using tsOps: ThreadSafeMapOps[F, V]): V = ${
-    opImpl[T, K, V, V]('{ tsOps.compute(map, _, _, f) })
+  inline def compute[T](f: Option[V] => Option[V])(using tsOps: ThreadSafeMapOps[F, V]): Option[V] = ${
+    opImpl[T, K, V, Option[V]]('{ tsOps.compute(map, _, _, f) })
   }
   def unsafeMap: F[V] = map
 

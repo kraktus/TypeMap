@@ -37,7 +37,7 @@ object Bus:
   inline def subscribe[T <: Keys: ClassTag](f: PartialFunction[T, Unit]): Unit =
     assertBuseable[T]
     val buseableFunction = buseableFunctionBuilder[T](f)
-    map.compute[T](_.fold(Set(buseableFunction))(_ + buseableFunction))
+    map.compute[T](v => Some(v.fold(Set(buseableFunction))(_ + buseableFunction)))
 
   inline def ask[A, T <: Keys](makeMsg: Promise[A] => T)(using
       ExecutionContext
@@ -70,7 +70,7 @@ object MutBus:
   inline def subscribe[T <: Any: ClassTag](f: PartialFunction[T, Unit]): Unit =
     assertBuseable[T]
     val buseableFunction = buseableFunctionBuilder[T](f)
-    map.compute[T](_.fold(Set(buseableFunction))(_ + buseableFunction))
+    map.compute[T](v => Some(v.fold(Set(buseableFunction))(_ + buseableFunction)))
 
   inline def ask[A, T](makeMsg: Promise[A] => T)(using
       ExecutionContext

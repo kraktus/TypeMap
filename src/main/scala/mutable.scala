@@ -13,16 +13,18 @@ trait MutableMapOps[F[_], V]:
   def put(ds: F[V], key: String, value: V): Unit
 
 trait ThreadSafeMutableMapOps[F[_], V]:
-  def computeIfAbsent(ds: F[V], key: String, f: => V): V
-  def computeIfPresent(ds: F[V], key: String, f: V => V): Option[V]
-  def compute(ds: F[V], key: String, f: Option[V] => V): V
+  def computeIfAbsent(ds: F[V], key: String, f: => Option[V]): Option[V]
+  def computeIfPresent(ds: F[V], key: String, f: V => Option[V]): Option[V]
+  def compute(ds: F[V], key: String, f: Option[V] => Option[V]): Option[V]
 
 // implement `ThreadSafeMutableMapOps` for all types implementing `ThreadSafeMapOps`
 given [F[_], V](using mutOps: ThreadSafeMutableMapOps[F, V]): ThreadSafeMapOps[F, V] with
-  def computeIfAbsent(ds: F[V], index: Int, key: String, f: => V): V = mutOps.computeIfAbsent(ds, key, f)
-  def computeIfPresent(ds: F[V], index: Int, key: String, f: V => V): Option[V] =
+  def computeIfAbsent(ds: F[V], index: Int, key: String, f: => Option[V]): Option[V] =
+    mutOps.computeIfAbsent(ds, key, f)
+  def computeIfPresent(ds: F[V], index: Int, key: String, f: V => Option[V]): Option[V] =
     mutOps.computeIfPresent(ds, key, f)
-  def compute(ds: F[V], index: Int, key: String, f: Option[V] => V): V = mutOps.compute(ds, key, f)
+  def compute(ds: F[V], index: Int, key: String, f: Option[V] => Option[V]): Option[V] =
+    mutOps.compute(ds, key, f)
 
 // implement `MapOps` for all types implementing `MutableMapOps`
 given [F[_], V](using mutOps: MutableMapOps[F, V]): MapOps[F, V] with
@@ -35,14 +37,15 @@ class MutableTypeMap[V, F[_]](private val map: F[V])(using ops: MutableMapOps[F,
   inline def get[T]: Option[V]      = ${ mutableOpImpl[T, V, Option[V]]('{ ops.get(map, _) }) }
   inline def put[T](value: V): Unit = ${ mutableOpImpl[T, V, Unit]('{ ops.put(map, _, value) }) }
 
-  inline def computeIfAbsent[T](f: => V)(using tsOps: ThreadSafeMutableMapOps[F, V]): V = ${
-    mutableOpImpl[T, V, V]('{ tsOps.computeIfAbsent(map, _, f) })
+  inline def computeIfAbsent[T](f: => Option[V])(using tsOps: ThreadSafeMutableMapOps[F, V]): Option[V] = ${
+    mutableOpImpl[T, V, Option[V]]('{ tsOps.computeIfAbsent(map, _, f) })
   }
-  inline def computeIfPresent[T](f: V => V)(using tsOps: ThreadSafeMutableMapOps[F, V]): Option[V] = ${
-    mutableOpImpl[T, V, Option[V]]('{ tsOps.computeIfPresent(map, _, f) })
-  }
-  inline def compute[T](f: Option[V] => V)(using tsOps: ThreadSafeMutableMapOps[F, V]): V = ${
-    mutableOpImpl[T, V, V]('{ tsOps.compute(map, _, f) })
+  inline def computeIfPresent[T](f: V => Option[V])(using tsOps: ThreadSafeMutableMapOps[F, V]): Option[V] =
+    ${
+      mutableOpImpl[T, V, Option[V]]('{ tsOps.computeIfPresent(map, _, f) })
+    }
+  inline def compute[T](f: Option[V] => Option[V])(using tsOps: ThreadSafeMutableMapOps[F, V]): Option[V] = ${
+    mutableOpImpl[T, V, Option[V]]('{ tsOps.compute(map, _, f) })
   }
 
   def unsafeMap: F[V] = map
