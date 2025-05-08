@@ -14,6 +14,13 @@ package inside:
 case class A(i: Int)
 case class B(s: String)
 
+enum EnumType:
+  case EnumMember(i: Int)
+  case Baz(s: String)
+
+val errorMessageTemplate =
+  "The type %s should be case class, or enum (NOT enum member)"
+
 class TypeMapTest extends munit.FunSuite:
   test("isInTuple") {
     assertEquals(isInTuple[Int, (String, Int)], true)
@@ -75,22 +82,29 @@ class TypeMapTest extends munit.FunSuite:
   test("assertBuseable") {
     assertBuseable[A]
     assertBuseable[inside.InsidePackage]
+    assertBuseable[EnumType]
     assertNoDiff(
       compileErrors("assertBuseable[IntOpaque]"),
-      """error: The type test$package.IntOpaque should be case class, or enum
+      s"""error: ${errorMessageTemplate.format("test$package.IntOpaque")}
       compileErrors("assertBuseable[IntOpaque]"),
                   ^""".stripMargin
     )
     assertNoDiff(
       compileErrors("assertBuseable[Alias]"),
-      """error: The type scala.Tuple3[scala.Int, scala.Predef.String, scala.Float] should be case class, or enum
+      s"""error: ${errorMessageTemplate.format("scala.Tuple3[scala.Int, scala.Predef.String, scala.Float]")}
       compileErrors("assertBuseable[Alias]"),
                   ^""".stripMargin
     )
     assertNoDiff(
       compileErrors("assertBuseable[Union]"),
-      """error: The type scala.Predef.String | scala.Int | scala.Float should be case class, or enum
+      s"""error: ${errorMessageTemplate.format("scala.Predef.String | scala.Int | scala.Float")}
       compileErrors("assertBuseable[Union]"),
+                  ^""".stripMargin
+    )
+    assertNoDiff(
+      compileErrors("assertBuseable[EnumType.EnumMember]"),
+      s"""error: ${errorMessageTemplate.format("EnumType.EnumMember")}
+      compileErrors("assertBuseable[EnumType.EnumMember]"),
                   ^""".stripMargin
     )
   }

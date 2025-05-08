@@ -81,7 +81,7 @@ class ExamplesTest extends munit.FunSuite:
           "  case C(_, _, _) => eResult = None\n" +
           "  case D(_, _)    => eResult = None"
       ),
-      """error: The type scala.Any should be case class, or enum
+      """error: The type scala.Any should be case class, or enum (NOT enum member)
       compileErrors(
                   ^""".stripMargin
     )

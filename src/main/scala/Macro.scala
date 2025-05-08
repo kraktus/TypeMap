@@ -32,15 +32,20 @@ def typeNameImpl[A: Type](using Quotes): Expr[String] =
   */
 inline def assertBuseable[A] = ${ assertBuseableImpl[A] }
 
+private[typemap] val errorMessageTemplate =
+  "The type %s should be case class, or enum (NOT enum member)"
+
 def assertBuseableImpl[A: Type](using Quotes) =
   import quotes.reflect.*
-  val tpe    = quotes.reflect.TypeRepr.of[A].dealiasKeepOpaques
-  val flags  = tpe.typeSymbol.flags
-  val isEnum = flags.is(Flags.Enum)
+  val tpe   = quotes.reflect.TypeRepr.of[A].dealiasKeepOpaques
+  val flags = tpe.typeSymbol.flags
+  // we want to allow Enum, but NOT a specific enum member
+  val isEnum = flags.is(Flags.Enum) && !flags.is(Flags.Case)
+  println(s"assertBuseable: ${tpe.show}, {isEnum = $isEnum}")
   // internally tuples are represented as case class, so need to be filtered out manually
   val isTuple     = tpe <:< TypeRepr.of[Tuple]
-  val isCaseClass = (!isTuple && tpe.typeSymbol.isClassDef && flags.is(Flags.Case))
-  if !(isEnum || isCaseClass) then report.errorAndAbort(s"The type ${tpe.show} should be case class, or enum")
+  val isCaseClass = (!flags.is(Flags.Enum) && !isTuple && tpe.typeSymbol.isClassDef && flags.is(Flags.Case))
+  if !(isEnum || isCaseClass) then report.errorAndAbort(errorMessageTemplate.format(tpe.show))
   '{}
 
 inline def typeNamesTuple[T <: Tuple]: List[String] =
