@@ -41,7 +41,6 @@ def assertBuseableImpl[A: Type](using Quotes) =
   val flags = tpe.typeSymbol.flags
   // we want to allow Enum, but NOT a specific enum member
   val isEnum = flags.is(Flags.Enum) && !flags.is(Flags.Case)
-  println(s"assertBuseable: ${tpe.show}, {isEnum = $isEnum}")
   // internally tuples are represented as case class, so need to be filtered out manually
   val isTuple     = tpe <:< TypeRepr.of[Tuple]
   val isCaseClass = (!flags.is(Flags.Enum) && !isTuple && tpe.typeSymbol.isClassDef && flags.is(Flags.Case))
