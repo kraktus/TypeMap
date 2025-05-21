@@ -18,10 +18,10 @@ given [V] => ThreadSafeMutableMapOps[CMapBackend, V]:
       ds.computeIfAbsent(key, _ => f.getOrElse(null.asInstanceOf[V]))
   def computeIfPresent(ds: DS, key: String, f: V => Option[V]): Option[V] =
     Option:
-      ds.computeIfPresent(key, (k, v) => f(v).getOrElse(null.asInstanceOf[V]))
+      ds.computeIfPresent(key, (_, v) => f(v).getOrElse(null.asInstanceOf[V]))
   def compute(ds: DS, key: String, f: Option[V] => Option[V]): Option[V] =
     Option:
-      ds.compute(key, (k, v) => f(Option(v)).getOrElse(null.asInstanceOf[V]))
+      ds.compute(key, (_, v) => f(Option(v)).getOrElse(null.asInstanceOf[V]))
 
 type ArraySeqBackend = [X] =>> ArraySeq[Option[X]]
 given [V] => MapOps[ArraySeqBackend, V]:
