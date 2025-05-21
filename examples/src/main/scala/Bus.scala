@@ -2,8 +2,9 @@ package examples
 import typemap.{ TypeMap, MutableTypeMap, CMapBackend, assertBuseable, typeName, given }
 
 import scala.reflect.Typeable
-import scala.concurrent.{ Future, Promise, ExecutionContext }
+import scala.concurrent.{ Future, Promise }
 import scala.util.NotGiven
+import scala.annotation.nowarn
 
 case class A(i: Int)
 case class B(s: String)
@@ -21,7 +22,7 @@ object Bus:
 
   val map: TypeMap[Keys, Value, CMapBackend] = TypeMap.empty
 
-  inline def publish[T <: Keys](t: T)(using NotGiven[T <:< Tuple]): Unit =
+  inline def publish[T <: Keys](t: T)(using @nowarn ng: NotGiven[T <:< Tuple]): Unit =
     map.get[T].foreach(_.foreach(_.apply(t)))
   // extracted from `subscribe` to avoid warning about definition being duplicated at each callsite
   private def buseableFunctionBuilder[T <: Keys: Typeable](
@@ -39,9 +40,7 @@ object Bus:
     val buseableFunction = buseableFunctionBuilder[T](f)
     map.compute[T](v => Some(v.fold(Set(buseableFunction))(_ + buseableFunction)))
 
-  inline def ask[A, T <: Keys](makeMsg: Promise[A] => T)(using
-      ExecutionContext
-  ): Future[A] =
+  inline def ask[A, T <: Keys](makeMsg: Promise[A] => T): Future[A] =
     val promise = Promise[A]()
     val msg     = makeMsg(promise)
     publish(msg)
@@ -53,7 +52,9 @@ object MutBus:
   private type Value = Set[PartialFunction[Any, Unit]]
   val map: MutableTypeMap[Value, CMapBackend] = MutableTypeMap.empty
 
-  inline def publish[T](t: T)(using NotGiven[T <:< Tuple], NotGiven[T <:< NotBuseable]): Unit =
+  inline def publish[T](
+      t: T
+  )(using @nowarn ng1: NotGiven[T <:< Tuple], @nowarn ng2: NotGiven[T <:< NotBuseable]): Unit =
     map.get[T].foreach(_.foreach(_.apply(t)))
 
   // extracted from `subscribe` to avoid warning about definition being duplicated at each callsite
@@ -72,9 +73,7 @@ object MutBus:
     val buseableFunction = buseableFunctionBuilder[T](f)
     map.compute[T](v => Some(v.fold(Set(buseableFunction))(_ + buseableFunction)))
 
-  inline def ask[A, T](makeMsg: Promise[A] => T)(using
-      ExecutionContext
-  ): Future[A] =
+  inline def ask[A, T](makeMsg: Promise[A] => T): Future[A] =
     val promise = Promise[A]()
     val msg     = makeMsg(promise)
     publish(msg)

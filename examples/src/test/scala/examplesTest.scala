@@ -57,7 +57,7 @@ class ExamplesTest extends munit.FunSuite:
     MutBus.publish(b)
     assertNoDiff(
       compileErrors(" MutBus.publish(b, \"bb\")"),
-      """error: No given instance of type scala.util.NotGiven[(examples.B, String) <:< Tuple] was found for parameter x$2 of method publish in object MutBus
+      """error: No given instance of type scala.util.NotGiven[(examples.B, String) <:< Tuple] was found for parameter ng1 of method publish in object MutBus
  MutBus.publish(b, "bb")
                        ^""".stripMargin
     )
@@ -89,7 +89,7 @@ class ExamplesTest extends munit.FunSuite:
 
     assertNoDiff(
       compileErrors("MutBus.publish(Impossible(\"not buseable!!\"))"),
-      """error: No given instance of type scala.util.NotGiven[examples.Impossible <:< examples.NotBuseable] was found for parameter x$3 of method publish in object MutBus
+      """error: No given instance of type scala.util.NotGiven[examples.Impossible <:< examples.NotBuseable] was found for parameter ng2 of method publish in object MutBus
 MutBus.publish(Impossible("not buseable!!"))
                                            ^""".stripMargin
     )
