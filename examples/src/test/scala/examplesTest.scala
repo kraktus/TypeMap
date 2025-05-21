@@ -44,7 +44,6 @@ class ExamplesTest extends munit.FunSuite:
     var fooResult: Option[Foo] = None
 
     // val e                  = E("zombo")
-    var eResult: Option[E] = None
 
     MutBus.subscribe[A] { case x: A => aResult = Some(x) }
     MutBus.subscribe[B] { case y: B => bResult = Some(b) }
