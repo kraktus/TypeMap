@@ -1,6 +1,6 @@
 inThisBuild(
   Seq(
-    scalaVersion  := "3.6.4",
+    scalaVersion  := "3.7.0",
     versionScheme := Some("early-semver"),
     version       := "0.2.1",
     organization  := "org.lichess",
@@ -20,21 +20,19 @@ val commonSettings = Seq(
     // "-language:postfixOps",
     "-Wunused:all",
     "-release:21"
-    //"-Werror"
+    // "-Werror"
     // Warnings as errors!
     /* "-Xfatal-warnings" */
   )
 )
 
-
 lazy val typemap = project
   .in(file("."))
   .settings(
     commonSettings,
-    name := "typemap",
+    name                                   := "typemap",
     libraryDependencies += "org.scalameta" %% "munit" % "1.0.0" % Test
   )
-
 
 lazy val examples = project
   .in(file("examples"))
@@ -43,7 +41,6 @@ lazy val examples = project
     name := "examples"
   )
   .dependsOn(typemap, typemap % "compile->test")
-
 
 lazy val bench = project
   .enablePlugins(JmhPlugin)
@@ -56,3 +53,4 @@ addCommandAlias("build", toAllProjects("compile"))
 addCommandAlias("fmt", toAllProjects("scalafmtAll"))
 addCommandAlias("fmtCheck", toAllProjects("scalafmtCheckAll"))
 addCommandAlias("test", toAllProjects("test"))
+
