@@ -17,6 +17,7 @@ class TypeMapBenchmark:
   private type Keys = Int | String | Float
 
   @Param(Array("cmap", "arraySeq", "cowArray"))
+  @annotation.nowarn
   private var backend: String = ""
 
   var tmap: TypeMap[Keys, String, ?] = scala.compiletime.uninitialized
