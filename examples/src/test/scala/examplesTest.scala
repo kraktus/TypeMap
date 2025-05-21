@@ -15,7 +15,7 @@ class ExamplesTest extends munit.FunSuite:
     val foo                    = Foo.Baz("baz")
     var fooResult: Option[Foo] = None
     Bus.subscribe[A] { case x: A => aResult = Some(x) }
-    Bus.subscribe[B] { case y: B => bResult = Some(b) }
+    Bus.subscribe[B] { case y: B => bResult = Some(y) }
     Bus.subscribe[C] { case C(i, s, f) => cResult = Some(C(i, s, f)) }
     Bus.subscribe[D] { case D(init, p) => p.completeWith(Future.successful(init + 42)) }
     Bus.subscribe[Foo] { case Foo.Bar(i) => fooResult = Some(Foo.Bar(i)) }
@@ -48,7 +48,7 @@ class ExamplesTest extends munit.FunSuite:
     var eResult: Option[E] = None
 
     MutBus.subscribe[A] { case x: A => aResult = Some(x) }
-    MutBus.subscribe[B] { case y: B => bResult = Some(b) }
+    MutBus.subscribe[B] { case y: B => bResult = Some(y) }
     MutBus.subscribe[C] { case C(i, s, f) => cResult = Some(C(i, s, f)) }
     MutBus.subscribe[D] { case D(init, p) => p.completeWith(Future.successful(init + 42)) }
     MutBus.subscribe[Foo] { case Foo.Bar(i) => fooResult = Some(Foo.Bar(i)) }
