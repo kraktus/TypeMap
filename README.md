@@ -2,6 +2,8 @@
 
 This project is a simple implementation of a type-level map in Scala3, using macros. Inspired by the rust crate [`anymap`](https://docs.rs/anymap/latest/anymap/).
 
+[![](https://jitpack.io/v/lichess-org/TypeMap.svg)](https://jitpack.io/#lichess-org/TypeMap)
+
 ### INSTALL
 
 Clone typemap
@@ -82,4 +84,3 @@ assertEquals(map.get[String], None)
 // does not compile, as expected
 map.get[Float]
 ````
-
